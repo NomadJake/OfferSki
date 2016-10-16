@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "817010425169",
+    "firebase_url": "https://hitch-67c90.firebaseio.com",
+    "project_id": "hitch-67c90",
+    "storage_bucket": "hitch-67c90.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:817010425169:android:dbf5650f6a6d9491",
+        "android_client_info": {
+          "package_name": "com.hitch.nomad.hitchbeacon"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "817010425169-q7joid757mjmihur1nkinc75d2k2b303.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBvzCHcKAu4SmuE4kXw8jDLeHP961PHh4U"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
