@@ -28,7 +28,7 @@
                 style="@style/TextAppearance.AppCompat.Display1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Title"
+                android:hint="Coupon"
                 android:inputType="text"
                 android:maxLines="4"
                 android:textColor="@android:color/primary_text_light" />
@@ -67,11 +67,11 @@
         android:tint="@android:color/white" />
 
     <EditText
-        android:id="@+id/addnote_desc"
+        android:id="@+id/et_found"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="top"
-        android:hint="Description"
+        android:hint="HitchId"
         android:inputType="textMultiLine"
         android:maxLines="10"
         android:singleLine="false"

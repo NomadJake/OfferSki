@@ -339,7 +339,7 @@ public class advertise extends Service implements LeScanCallback {
     }
 
     public void foundHitch(String hitchId){
-        List<Note> notes = Note.findWithQuery(Note.class, "Select * from Note where hitch_id = ?", hitchId);
+        List<Note> notes = Note.findWithQuery(Note.class, "Select * from Note where note = ?", hitchId);
         for(Note note : notes){
             if(!note.getDiscovered().equals("true")){
                 notifyUser(note);
@@ -364,7 +364,7 @@ public class advertise extends Service implements LeScanCallback {
 
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         Bitmap icon = BitmapFactory.decodeResource(getResources(),
-                R.drawable.ic_add_24dp);
+                R.drawable.fronthitchlogo);
 
         builder = new NotificationCompat.Builder(getApplicationContext());
 

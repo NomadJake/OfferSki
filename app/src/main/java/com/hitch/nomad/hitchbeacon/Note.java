@@ -1,10 +1,12 @@
 package com.hitch.nomad.hitchbeacon;
 
+import com.google.firebase.database.IgnoreExtraProperties;
 import com.orm.SugarRecord;
 
 /**
- * Created by Suleiman19 on 1/21/16.
+ * Created by nomad on 1/21/16.
  */
+@IgnoreExtraProperties
 public class Note extends SugarRecord {
     String title;
     String note;

@@ -9,6 +9,8 @@ import android.widget.EditText;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.List;
 
@@ -17,13 +19,15 @@ public class AddNoteActivity extends AppCompatActivity {
     Toolbar toolbar;
     FloatingActionButton fab;
 
-    EditText etTitle, etDesc;
+    EditText etTitle, etTag;
 
-
+    private DatabaseReference mDatabase;
+    private String mUserId;
     String title, note;
     long time;
 
     boolean editingNote;
+    private EditText etDiscovered;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +38,13 @@ public class AddNoteActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_clear_24dp);
 
-        getSupportActionBar().setTitle("Add new note");
+        getSupportActionBar().setTitle("Add new coupon");
+
+        // Initialize Firebase Auth and Database Reference
+//        mFirebaseAuth = FirebaseAuth.getInstance();
+//        mFirebaseUser = mFirebaseAuth.getCurrentUser();
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+
 
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -45,8 +55,8 @@ public class AddNoteActivity extends AppCompatActivity {
 
 
         etTitle = (EditText) findViewById(R.id.addnote_title);
-        etDesc = (EditText) findViewById(R.id.addnote_desc);
-
+        etTag = (EditText) findViewById(R.id.add_hitch_id);
+        etDiscovered = (EditText)findViewById(R.id.et_found);
         fab = (FloatingActionButton) findViewById(R.id.addnote_fab);
 
 
@@ -60,7 +70,7 @@ public class AddNoteActivity extends AppCompatActivity {
             time = getIntent().getLongExtra("note_time", 0);
 
             etTitle.setText(title);
-            etDesc.setText(note);
+            etTag.setText(note);
 
         }
 
@@ -72,8 +82,8 @@ public class AddNoteActivity extends AppCompatActivity {
                 // Add note to DB
 
                 String newTitle = etTitle.getText().toString();
-                String newDesc = etDesc.getText().toString();
-                long newTime = System.currentTimeMillis();
+                String newTag = etTag.getText().toString();
+                String newDiscovered = etDiscovered.getText().toString();
 
 
                 /**
@@ -81,7 +91,7 @@ public class AddNoteActivity extends AppCompatActivity {
                  */
                 if (!editingNote) {
                     Log.d("Note", "saving");
-                    Note note = new Note(newTitle, newDesc,newDesc);
+                    Note note = new Note(newTitle, newTag,newDiscovered);
                     note.save();
                 } else {
                     Log.d("Note", "updating");
@@ -93,9 +103,10 @@ public class AddNoteActivity extends AppCompatActivity {
                         Note note = notes.get(0);
                         Log.d("got note", "note: " + note.title);
                         note.title = newTitle;
-                        note.note = newDesc;
+                        note.note = newTag;
 
                         note.save();
+                        mDatabase.child("users").child(note.title).setValue(note);
 
                     }
 

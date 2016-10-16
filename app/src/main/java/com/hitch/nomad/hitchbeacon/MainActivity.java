@@ -1,12 +1,15 @@
 package com.hitch.nomad.hitchbeacon;
 //Developer : nomad
 import android.annotation.SuppressLint;
+import android.app.ActivityManager;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
@@ -17,6 +20,8 @@ import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.View;
+
+import com.google.firebase.database.DatabaseReference;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -34,6 +39,9 @@ public class MainActivity extends AppCompatActivity {
     long initialCount;
 
     int modifyPos = -1;
+
+    private DatabaseReference mDatabase;
+    private String mUserId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -163,6 +171,20 @@ public class MainActivity extends AppCompatActivity {
 //        if (notes.size() > 0)
 //            Log.d("Notes", "note: " + notes.get(0).title);
 
+        Intent fcmrefresh = new Intent(this, MyFirebaseInstanceIDService.class);
+        startService(fcmrefresh);
+        if(!isMyServiceRunning(advertise.class)){
+            final Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    Intent serviceIntetnt = new Intent(MainActivity.this,advertise.class);
+                    serviceIntetnt.setAction("track");
+                    startService(serviceIntetnt);
+                }
+            }, 10000);
+
+        }
 
     }
 
@@ -214,5 +236,14 @@ public class MainActivity extends AppCompatActivity {
         return new SimpleDateFormat("dd MMM yyyy").format(new Date(date));
     }
 
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
 
 }
