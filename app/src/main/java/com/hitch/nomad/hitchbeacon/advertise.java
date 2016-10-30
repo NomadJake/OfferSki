@@ -34,6 +34,10 @@ import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 public class advertise extends Service implements LeScanCallback {
 
 
@@ -67,7 +71,10 @@ public class advertise extends Service implements LeScanCallback {
     private Notification stateHolderNotification;
     private String oldHitchId = "rosieNips";
 
-    List<Note> notes = new ArrayList<>();
+    List<Offer> offers = new ArrayList<>();
+    private FirebaseAuth auth;
+    private DatabaseReference mDatabase;
+
 
     public void setAlive(boolean alive) {
         this.alive = alive;
@@ -111,8 +118,11 @@ public class advertise extends Service implements LeScanCallback {
         uriMapping.put("74:DA:EA:B2:5B:EC","http://www.hdfcbank.com/");
         uriMapping.put("74:DA:EA:B1:43:64","http://www.rblbank.com/");
         uriMapping.put("1","Scanning...");
-        notes = Note.listAll(Note.class);
+        offers = new ArrayList<>(Hitchbeacon.offerLinkedHashMap.values());
         super.onCreate();
+        auth = FirebaseAuth.getInstance();
+
+        mDatabase = FirebaseDatabase.getInstance().getReference();
     }
 
 
@@ -156,11 +166,11 @@ public class advertise extends Service implements LeScanCallback {
 
             @Override
             public void run() {
-                Note gift = new Note("Bra","VS","123456");
+                Offer gift = new Offer("Title","Offer","discovered","hitchuid");
                 gift.save();
             }
         }, 300000);
-        return 0;
+        return START_NOT_STICKY;
     }
 
     @Override
@@ -339,21 +349,22 @@ public class advertise extends Service implements LeScanCallback {
     }
 
     public void foundHitch(String hitchId){
-        List<Note> notes = Note.findWithQuery(Note.class, "Select * from Note where note = ?", hitchId);
-        for(Note note : notes){
-            if(!note.getDiscovered().equals("true")){
-                notifyUser(note);
+        List<Offer> offers = new ArrayList<>(Hitchbeacon.offerLinkedHashMap.values());//Offer.findWithQuery(Offer.class, "Select * from Offer where offer = ?", hitchId);
+        for(Offer offer : offers){
+            if(!offer.getDiscovered().equals("true")){
+                notifyUser(offer);
             }
-            note.setDiscovered("true");
-            note.save();
+            offer.setDiscovered("true");
+//            offer.save();
+            mDatabase.child("offers").child(offer.title).setValue(offer);
         }
     }
 
-    public void notifyUser(Note found_note){
+    public void notifyUser(Offer found_offer){
         Intent doneIntent = new Intent(this,advertise.class);
         doneIntent.setAction("done");
 //        doneIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-        doneIntent.putExtra("brand",found_note.getTitle());
+        doneIntent.putExtra("brand",found_offer.getTitle());
         PendingIntent pendingDoneIntent = PendingIntent.getService(this, 0,
                 doneIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
@@ -369,7 +380,7 @@ public class advertise extends Service implements LeScanCallback {
         builder = new NotificationCompat.Builder(getApplicationContext());
 
         builder.setContentTitle("You found a new coupon !");
-        builder.setContentText(found_note.getNote());
+        builder.setContentText(found_offer.getOffer());
         builder.setSmallIcon(R.drawable.ic_add_24dp);
         builder.setLargeIcon(Bitmap.createScaledBitmap(icon, 200, 200, false));
         builder.setOngoing(true);

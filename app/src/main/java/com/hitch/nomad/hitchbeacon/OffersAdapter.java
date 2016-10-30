@@ -12,13 +12,13 @@ import java.util.List;
 /**
  * Created by Suleiman19 on 2/13/16.
  */
-public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteVH> {
+public class OffersAdapter extends RecyclerView.Adapter<OffersAdapter.OfferVH> {
     Context context;
-    List<Note> notes;
+    List<Offer> notes;
 
     OnItemClickListener clickListener;
 
-    public NotesAdapter(Context context, List<Note> notes) {
+    public OffersAdapter(Context context, List<Offer> notes) {
         this.context = context;
         this.notes = notes;
 
@@ -26,17 +26,17 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteVH> {
 
 
     @Override
-    public NoteVH onCreateViewHolder(ViewGroup parent, int viewType) {
+    public OfferVH onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.note_item, parent, false);
-        NoteVH viewHolder = new NoteVH(view);
+        OfferVH viewHolder = new OfferVH(view);
         return viewHolder;
     }
 
     @Override
-    public void onBindViewHolder(NoteVH holder, int position) {
+    public void onBindViewHolder(OfferVH holder, int position) {
 
         holder.title.setText(notes.get(position).getTitle());
-        holder.note.setText(notes.get(position).getNote());
+        holder.note.setText(notes.get(position).getOffer());
 
     }
 
@@ -45,10 +45,10 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteVH> {
         return notes.size();
     }
 
-    class NoteVH extends RecyclerView.ViewHolder implements View.OnClickListener {
+    class OfferVH extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView title, note;
 
-        public NoteVH(View itemView) {
+        public OfferVH(View itemView) {
             super(itemView);
 
             title = (TextView) itemView.findViewById(R.id.note_item_title);

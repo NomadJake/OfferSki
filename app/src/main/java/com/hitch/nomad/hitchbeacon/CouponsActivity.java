@@ -20,7 +20,6 @@ import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -30,53 +29,55 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class CouponsActivity extends AppCompatActivity {
 
     RecyclerView recyclerView;
     FloatingActionButton fab;
 
-    OffersAdapter adapter;
-    List<Offer> offers = new ArrayList<>();
+    CouponAdapter adapter;
+    List<Note> notes = new ArrayList<>();
 
     long initialCount;
 
     int modifyPos = -1;
     private DatabaseReference mDatabase;
 
-    public Button buttonForOffers;
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         Log.d("Main", "onCreate");
+
         recyclerView = (RecyclerView) findViewById(R.id.main_list);
         fab = (FloatingActionButton) findViewById(R.id.fab);
-        buttonForOffers = (Button)findViewById(R.id.toggle_offers_button);
-        buttonForOffers.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this,CouponsActivity.class));
-            }
-        });
+
         StaggeredGridLayoutManager gridLayoutManager =
                 new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
         gridLayoutManager.setGapStrategy(StaggeredGridLayoutManager.GAP_HANDLING_MOVE_ITEMS_BETWEEN_SPANS);
+
         recyclerView.setLayoutManager(gridLayoutManager);
+
+        initialCount = Note.count(Note.class);
         mDatabase = FirebaseDatabase.getInstance().getReference();
-        initialCount = Offer.count(Offer.class);
+
         if (savedInstanceState != null)
             modifyPos = savedInstanceState.getInt("modify");
+
+
         if (initialCount >= 0) {
 
-//            offers = Offer.findWithQuery(Offer.class, "Select * from Offer where discovered = ?", "true");//Offer.listAll(Offer.class);
-            offers = new ArrayList<>(Hitchbeacon.offerLinkedHashMap.values());
-            adapter = new OffersAdapter(MainActivity.this, offers);
+//            notes = Note.findWithQuery(Note.class, "Select * from Note where discovered = ?", "true");//Note.listAll(Note.class);
+            try {
+                notes = new ArrayList<>(Hitchbeacon.noteLinkedHashMap.values());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            adapter = new CouponAdapter(CouponsActivity.this, notes);
             recyclerView.setAdapter(adapter);
 
-            if (offers.isEmpty())
-                Snackbar.make(recyclerView, "No offers added.", Snackbar.LENGTH_LONG).show();
+            if (notes.isEmpty())
+                Snackbar.make(recyclerView, "No notes added.", Snackbar.LENGTH_LONG).show();
 
         }
 
@@ -87,16 +88,25 @@ public class MainActivity extends AppCompatActivity {
             drawable = DrawableCompat.wrap(drawable);
             DrawableCompat.setTint(drawable, Color.WHITE);
             DrawableCompat.setTintMode(drawable, PorterDuff.Mode.SRC_IN);
+
             fab.setImageDrawable(drawable);
+
         }
+
+
+
+
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                Intent i = new Intent(MainActivity.this, AddOfferActivity.class);
+                Intent i = new Intent(CouponsActivity.this, AddNoteActivity.class);
                 startActivity(i);
+
             }
         });
+
+
         // Handling swipe to delete
         ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
 
@@ -110,22 +120,25 @@ public class MainActivity extends AppCompatActivity {
                 //Remove swiped item from list and notify the RecyclerView
 
                 final int position = viewHolder.getAdapterPosition();
-                final Offer offer = offers.get(viewHolder.getAdapterPosition());
-                offers.remove(viewHolder.getAdapterPosition());
+                final Note note = notes.get(viewHolder.getAdapterPosition());
+                notes.remove(viewHolder.getAdapterPosition());
                 adapter.notifyItemRemoved(position);
 
-//                offer.delete();
+                note.delete();
                 initialCount -= 1;
-                mDatabase.child("offers").child(offer.title).setValue(null);
-                Snackbar.make(recyclerView, "Offer deleted", Snackbar.LENGTH_SHORT)
+                mDatabase.child("notes").child(note.title).setValue(null);
+
+
+                Snackbar.make(recyclerView, "Note deleted", Snackbar.LENGTH_SHORT)
                         .setAction("UNDO", new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                    // Remove this sugar orm shit and port everything to firebase.
-//                                offer.save();
-                                offers.add(position, offer);
+
+//                                note.save();
+                                notes.add(position, note);
                                 adapter.notifyItemInserted(position);
                                 initialCount += 1;
+
                             }
                         })
                         .show();
@@ -138,16 +151,16 @@ public class MainActivity extends AppCompatActivity {
 
 
         try {
-            adapter.SetOnItemClickListener(new OffersAdapter.OnItemClickListener() {
+            adapter.SetOnItemClickListener(new CouponAdapter.OnItemClickListener() {
                 @Override
                 public void onItemClick(View view, int position) {
 
                     Log.d("Main", "click");
 
-                    Intent i = new Intent(MainActivity.this, AddOfferActivity.class);
+                    Intent i = new Intent(CouponsActivity.this, AddNoteActivity.class);
                     i.putExtra("isEditing", true);
-                    i.putExtra("offer_title", offers.get(position).title);
-                    i.putExtra("offer", offers.get(position).Offer);
+                    i.putExtra("note_title", notes.get(position).title);
+                    i.putExtra("note", notes.get(position).note);
 
 
                     modifyPos = position;
@@ -160,26 +173,14 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
-//        List<Offer> offers = Offer.findWithQuery(Offer.class, "Select title from Offer where title = ?", "%offer%");
-//        if (offers.size() > 0)
-//            Log.d("Offers", "offer: " + offers.get(0).title);
+//        List<Note> notes = Note.findWithQuery(Note.class, "Select title from Note where title = ?", "%note%");
+//        if (notes.size() > 0)
+//            Log.d("Notes", "note: " + notes.get(0).title);
 
-        Intent fcmrefresh = new Intent(this, MyFirebaseInstanceIDService.class);
-        startService(fcmrefresh);
-        if(!isMyServiceRunning(advertise.class)){
-            final Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    Intent serviceIntetnt = new Intent(MainActivity.this,advertise.class);
-                    serviceIntetnt.setAction("track");
-//                    startService(serviceIntetnt);
-                }
-            }, 10000);
 
         }
 
-    }
+
 
 
     @Override
@@ -200,25 +201,22 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        final long newCount = Offer.count(Offer.class);
+        final long newCount = Note.count(Note.class);
 
         if (newCount > initialCount) {
-            // A offer is added
-            Log.d("Main", "Adding new offer");
+            // A note is added
+            Log.d("Main", "Adding new note");
 
-            // Just load the last added offer (new)
-            Offer offer = Offer.last(Offer.class);
+            // Just load the last added note (new)
+            Note note = Note.last(Note.class);
+            notes.add(note);
+            adapter.notifyItemInserted((int) newCount);
+            initialCount = newCount;
 
-            if (offer.getDiscovered().equals("true")) {
-                offers.add(offer);
-                adapter.notifyItemInserted((int) newCount);
-
-                initialCount = newCount;
-            }
         }
 
         if (modifyPos != -1) {
-            offers.set(modifyPos, Offer.listAll(Offer.class).get(modifyPos));
+            notes.set(modifyPos, Note.listAll(Note.class).get(modifyPos));
             adapter.notifyItemChanged(modifyPos);
         }
 
@@ -229,14 +227,5 @@ public class MainActivity extends AppCompatActivity {
         return new SimpleDateFormat("dd MMM yyyy").format(new Date(date));
     }
 
-    private boolean isMyServiceRunning(Class<?> serviceClass) {
-        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (serviceClass.getName().equals(service.service.getClassName())) {
-                return true;
-            }
-        }
-        return false;
-    }
 
 }

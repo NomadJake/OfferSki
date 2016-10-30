@@ -10,16 +10,14 @@ import com.orm.SugarRecord;
 public class Note extends SugarRecord {
     String title;
     String note;
-    String discovered;
 
     public Note() {
     }
 
 
-    public Note(String title, String note, String discovered) {
+    public Note(String title, String note) {
         this.title = title;
         this.note = note;
-        this.discovered = discovered;
     }
 
     public String getTitle() {
@@ -38,12 +36,5 @@ public class Note extends SugarRecord {
         this.note = note;
     }
 
-    public String getDiscovered() {
-        return discovered;
-    }
-
-    public void setDiscovered(String discovered) {
-        this.discovered = discovered;
-    }
 
 }

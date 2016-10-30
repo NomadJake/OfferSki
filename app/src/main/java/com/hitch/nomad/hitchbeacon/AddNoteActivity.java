@@ -18,16 +18,12 @@ public class AddNoteActivity extends AppCompatActivity {
 
     Toolbar toolbar;
     FloatingActionButton fab;
-
-    EditText etTitle, etTag;
+    EditText etTitle, etNote;
 
     private DatabaseReference mDatabase;
-    private String mUserId;
     String title, note;
     long time;
-
     boolean editingNote;
-    private EditText etDiscovered;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,11 +36,7 @@ public class AddNoteActivity extends AppCompatActivity {
 
         getSupportActionBar().setTitle("Add new coupon");
 
-        // Initialize Firebase Auth and Database Reference
-//        mFirebaseAuth = FirebaseAuth.getInstance();
-//        mFirebaseUser = mFirebaseAuth.getCurrentUser();
         mDatabase = FirebaseDatabase.getInstance().getReference();
-
 
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -53,27 +45,18 @@ public class AddNoteActivity extends AppCompatActivity {
             }
         });
 
-
-        etTitle = (EditText) findViewById(R.id.addnote_title);
-        etTag = (EditText) findViewById(R.id.add_hitch_id);
-        etDiscovered = (EditText)findViewById(R.id.et_found);
+        etTitle = (EditText) findViewById(R.id.note_title);
+        etNote = (EditText) findViewById(R.id.note);
         fab = (FloatingActionButton) findViewById(R.id.addnote_fab);
 
-
-        //  handle intent
-
-//        editingNote = getIntent() != null;
         editingNote = getIntent().getBooleanExtra("isEditing", false);
         if (editingNote) {
             title = getIntent().getStringExtra("note_title");
             note = getIntent().getStringExtra("note");
             time = getIntent().getLongExtra("note_time", 0);
-
             etTitle.setText(title);
-            etTag.setText(note);
-
+            etNote.setText(note);
         }
-
 
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -82,39 +65,30 @@ public class AddNoteActivity extends AppCompatActivity {
                 // Add note to DB
 
                 String newTitle = etTitle.getText().toString();
-                String newTag = etTag.getText().toString();
-                String newDiscovered = etDiscovered.getText().toString();
-
-
-                /**
-                 * TODO: Check if note exists before saving
-                 */
-                if (!editingNote) {
-                    Log.d("Note", "saving");
-                    Note note = new Note(newTitle, newTag,newDiscovered);
-                    note.save();
-                } else {
-                    Log.d("Note", "updating");
-
-//                    List<Note> notes = Note.findWithQuery(Note.class, "where title = ?", title);
-                    List<Note> notes = Note.find(Note.class, "title = ?", title);
-                    if (notes.size() > 0) {
-
-                        Note note = notes.get(0);
-                        Log.d("got note", "note: " + note.title);
-                        note.title = newTitle;
-                        note.note = newTag;
-
-                        note.save();
-                        mDatabase.child("users").child(note.title).setValue(note);
-
-                    }
-
-                }
-
+                String newNote = etNote.getText().toString();
+                Note note = new Note(newTitle, newNote);
+                mDatabase.child("notes").child(note.title).setValue(note);
+//                /**
+//                 * TODO: Check if note exists before saving
+//                 */
+//                if (!editingNote) {
+//                    Log.d("Note", "saving");
+//                    Note note = new Note(newTitle, newNote);
+//                    note.save();
+//                } else {
+//                    Log.d("Note", "updating");
+//                    List<Note> notes = Note.find(Note.class, "title = ?", title);
+//                    if (notes.size() > 0) {
+//                        Note note = notes.get(0);
+//                        Log.d("got note", "note: " + note.title);
+//                        note.title = newTitle;
+//                        note.note = newNote;
+////                        note.save();
+//                        mDatabase.child("notes").child(note.title).setValue(note);
+//                    }
+//
+//                }
                 finish();
-
-
             }
         });
 

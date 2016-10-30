@@ -36,6 +36,8 @@ public class Constants {
     static int ALERT_MILD = 1;
     static int ALERT_LOW = 0;
 
+    static String  SIGNEDIN = "signedin";
+
 
     public static String serviceName(UUID uuid){
         if(uuid == UUIDS.IMMEDIATE_ALERT){
