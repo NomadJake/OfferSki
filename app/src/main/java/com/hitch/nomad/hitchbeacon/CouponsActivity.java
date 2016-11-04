@@ -58,8 +58,15 @@ public class CouponsActivity extends AppCompatActivity {
 
         recyclerView.setLayoutManager(gridLayoutManager);
 
-        initialCount = Note.count(Note.class);
         mDatabase = FirebaseDatabase.getInstance().getReference();
+        try {
+            notes = new ArrayList<>(Hitchbeacon.noteLinkedHashMap.values());
+            initialCount = notes.size();
+
+        } catch (Exception e) {
+            initialCount = 0;
+            e.printStackTrace();
+        }
 
         if (savedInstanceState != null)
             modifyPos = savedInstanceState.getInt("modify");
@@ -123,8 +130,6 @@ public class CouponsActivity extends AppCompatActivity {
                 final Note note = notes.get(viewHolder.getAdapterPosition());
                 notes.remove(viewHolder.getAdapterPosition());
                 adapter.notifyItemRemoved(position);
-
-                note.delete();
                 initialCount -= 1;
                 mDatabase.child("notes").child(note.title).setValue(null);
 
@@ -197,30 +202,30 @@ public class CouponsActivity extends AppCompatActivity {
         modifyPos = savedInstanceState.getInt("modify");
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        final long newCount = Note.count(Note.class);
-
-        if (newCount > initialCount) {
-            // A note is added
-            Log.d("Main", "Adding new note");
-
-            // Just load the last added note (new)
-            Note note = Note.last(Note.class);
-            notes.add(note);
-            adapter.notifyItemInserted((int) newCount);
-            initialCount = newCount;
-
-        }
-
-        if (modifyPos != -1) {
-            notes.set(modifyPos, Note.listAll(Note.class).get(modifyPos));
-            adapter.notifyItemChanged(modifyPos);
-        }
-
-    }
+//    @Override
+//    protected void onResume() {
+//        super.onResume();
+//
+//        final long newCount = notes.size();
+//
+//        if (newCount > initialCount) {
+//            // A note is added
+//            Log.d("Main", "Adding new note");
+//
+//            // Just load the last added note (new)
+//            Note note = Note.last(Note.class);
+//            notes.add(note);
+//            adapter.notifyItemInserted((int) newCount);
+//            initialCount = newCount;
+//
+//        }
+//
+//        if (modifyPos != -1) {
+//            notes.set(modifyPos, Note.listAll(Note.class).get(modifyPos));
+//            adapter.notifyItemChanged(modifyPos);
+//        }
+//
+//    }
 
     @SuppressLint("SimpleDateFormat")
     public static String getDateFormat(long date) {

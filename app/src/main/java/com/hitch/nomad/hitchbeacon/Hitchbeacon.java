@@ -12,6 +12,8 @@ import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.LinkedHashMap;
 
@@ -34,14 +36,36 @@ public class Hitchbeacon extends Application {
         super.onCreate();
         context = getApplicationContext();
         auth = FirebaseAuth.getInstance();
-        mDatabase.child("users").child(auth.getCurrentUser().getUid()).child("offers").addChildEventListener(new ChildEventListener() {
+        offerLinkedHashMap = new LinkedHashMap<>();
+        noteLinkedHashMap = new LinkedHashMap<>();
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        loggedin = sharedPreferences.getBoolean(Constants.SIGNEDIN,false);
+//        if (loggedin){
+//            mDatabase = FirebaseDatabase.getInstance().getReference();
+//            mDatabase.child("offers").addValueEventListener(new ValueEventListener() {
+//                @Override
+//                public void onDataChange(DataSnapshot dataSnapshot) {
+//                    for (DataSnapshot offerDataSnapshot : dataSnapshot.getChildren()){
+//                        Offer offer = offerDataSnapshot.getValue(Offer.class);
+//                        offerLinkedHashMap.put(offer.getTitle(),offer);
+//                    }
+//                }
+//
+//                @Override
+//                public void onCancelled(DatabaseError databaseError) {
+//
+//                }
+//            });
+//        }
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        mDatabase.child("offers").addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 String title = (String) dataSnapshot.child("title").getValue();
                 String offer = (String) dataSnapshot.child("offer").getValue();
                 String hitchId = (String) dataSnapshot.child("hitchId").getValue();
                 Offer offerInstance = new Offer(title,offer,"false",hitchId);
-                offerLinkedHashMap.put(title,offerInstance);
+//                offerLinkedHashMap.put(title,offerInstance);
                 LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent("offers"));
 
             }
@@ -71,11 +95,11 @@ public class Hitchbeacon extends Application {
             }
         });
 
-        mDatabase.child("users").child(auth.getCurrentUser().getUid()).child("coupons").addChildEventListener(new ChildEventListener() {
+        mDatabase.child("notes").addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 String title = (String) dataSnapshot.child("title").getValue();
-                String offer = (String) dataSnapshot.child("offer").getValue();
+                String offer = (String) dataSnapshot.child("note").getValue();
                 Note noteInstance = new Note(title,offer);
                 noteLinkedHashMap.put(title,noteInstance);
                 LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent("coupons"));
@@ -106,14 +130,13 @@ public class Hitchbeacon extends Application {
 
             }
         });
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        loggedin = sharedPreferences.getBoolean(Constants.SIGNEDIN,false);
+
         if(loggedin){
             sharedPreferences.edit().putBoolean(Constants.SIGNEDIN,true).apply(); //might cause shit
-            context.startActivity(new Intent(this,MainActivity.class));
+            context.startActivity(new Intent(this,MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
         }else {
             sharedPreferences.edit().putBoolean(Constants.SIGNEDIN,false).apply(); // might cause shit
-            context.startActivity(new Intent(this,LoginActivity.class));
+            context.startActivity(new Intent(this,LoginActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
 
         }
     }

@@ -22,7 +22,7 @@
             app:expandedTitleMarginEnd="64dp"
             app:expandedTitleMarginStart="48dp"
             app:layout_scrollFlags="scroll|exitUntilCollapsed"
-            app:title="Hitch Beacon">
+            app:title="OfferSki">
 
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"
@@ -31,11 +31,6 @@
                 android:background="?attr/colorPrimary"
                 app:popupTheme="@style/AppTheme.PopupOverlay" />
 
-            <Button
-                android:text="Coupons"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/toggle_offers_button" />
 
         </android.support.design.widget.CollapsingToolbarLayout>
 

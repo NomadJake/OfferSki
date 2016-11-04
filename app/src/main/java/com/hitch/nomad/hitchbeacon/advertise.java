@@ -162,14 +162,14 @@ public class advertise extends Service implements LeScanCallback {
             }
 
         }
-        new Handler().postDelayed(new Runnable() {
-
-            @Override
-            public void run() {
-                Offer gift = new Offer("Title","Offer","discovered","hitchuid");
-                gift.save();
-            }
-        }, 300000);
+//        new Handler().postDelayed(new Runnable() {
+//
+//            @Override
+//            public void run() {
+//                Offer gift = new Offer("Title","Offer","discovered","hitchuid");
+//                gift.save();
+//            }
+//        }, 300000);
         return START_NOT_STICKY;
     }
 

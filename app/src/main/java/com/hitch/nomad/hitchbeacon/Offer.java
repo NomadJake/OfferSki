@@ -7,7 +7,7 @@ import com.orm.SugarRecord;
  * Created by nomad on 1/21/16.
  */
 @IgnoreExtraProperties
-public class Offer extends SugarRecord {
+public class Offer{
     String title;
     String Offer;
     String discovered;
