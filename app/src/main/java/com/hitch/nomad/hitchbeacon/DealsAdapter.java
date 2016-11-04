@@ -9,13 +9,13 @@ import android.widget.TextView;
 
 import java.util.List;
 
-public class CouponAdapter extends RecyclerView.Adapter<CouponAdapter.OfferVH> {
+public class DealsAdapter extends RecyclerView.Adapter<DealsAdapter.OfferVH> {
     Context context;
-    List<Note> notes;
+    List<Deals> notes;
 
     OnItemClickListener clickListener;
 
-    public CouponAdapter(Context context, List<Note> notes) {
+    public DealsAdapter(Context context, List<Deals> notes) {
         this.context = context;
         this.notes = notes;
 
@@ -33,7 +33,7 @@ public class CouponAdapter extends RecyclerView.Adapter<CouponAdapter.OfferVH> {
     public void onBindViewHolder(OfferVH holder, int position) {
 
         holder.title.setText(notes.get(position).getTitle());
-        holder.note.setText(notes.get(position).getNote());
+        holder.note.setText(notes.get(position).getdeal());
 
     }
 

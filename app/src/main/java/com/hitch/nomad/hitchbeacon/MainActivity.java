@@ -221,7 +221,7 @@ public class MainActivity extends AppCompatActivity {
 
         }
         if (id == R.id.allDeals){
-            startActivity(new Intent(this,MainActivity.class));
+            startActivity(new Intent(this,DealsActivity.class));
 
         }
 

@@ -56,7 +56,9 @@
             android:value="com.hitch.nomad.hitchbeacon" />
 
         <activity android:name=".CouponsActivity" />
-        <activity android:name=".AddOfferActivity"></activity>
+        <activity android:name=".AddOfferActivity" />
+        <activity android:name=".DealsActivity"></activity>
+        <activity android:name=".AddDealActivity"/>
     </application>
 
 </manifest>
