@@ -30,6 +30,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
@@ -48,7 +49,6 @@ public class advertise extends Service implements LeScanCallback {
     private BluetoothManager mBluetoothManager;
     private BluetoothAdapter mBluetoothAdapter;
     private BluetoothGatt mBluetoothGatt;
-
 
     private static int mConnectionState;
     private static final int STATE_DISCONNECTED = 0;
@@ -118,7 +118,6 @@ public class advertise extends Service implements LeScanCallback {
         uriMapping.put("74:DA:EA:B2:5B:EC","http://www.hdfcbank.com/");
         uriMapping.put("74:DA:EA:B1:43:64","http://www.rblbank.com/");
         uriMapping.put("1","Scanning...");
-        offers = new ArrayList<>(Hitchbeacon.offerLinkedHashMap.values());
         super.onCreate();
         auth = FirebaseAuth.getInstance();
 
@@ -349,14 +348,23 @@ public class advertise extends Service implements LeScanCallback {
     }
 
     public void foundHitch(String hitchId){
-        List<Offer> offers = new ArrayList<>(Hitchbeacon.offerLinkedHashMap.values());//Offer.findWithQuery(Offer.class, "Select * from Offer where offer = ?", hitchId);
-        for(Offer offer : offers){
-            if(!offer.getDiscovered().equals("true")){
-                notifyUser(offer);
+        offers = new ArrayList<>(Hitchbeacon.offerLinkedHashMap.values());//Offer.findWithQuery(Offer.class, "Select * from Offer where offer = ?", hitchId);
+        if (offers.size() != 0) {
+            for(Offer offer : offers){
+                String hid = offer.getHitchId();
+                Log.d(hid,"hid");
+                if(!hid.equals(null)&&hid.equals(hitchId)&&!offer.getDiscovered().equals("true")){
+                    notifyUser(offer);
+                    try {
+                        offer.setDiscovered("true");
+                        Hitchbeacon.offerLinkedHashMap.put(offer.getTitle(),offer);
+                        mDatabase.child("offers").child(offer.getUid()).child("discovered").setValue("true");
+                        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent("offers"));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
             }
-            offer.setDiscovered("true");
-//            offer.save();
-            mDatabase.child("offers").child(offer.title).setValue(offer);
         }
     }
 

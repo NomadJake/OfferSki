@@ -49,7 +49,8 @@ public class Hitchbeacon extends Application {
                 String title = (String) dataSnapshot.child("title").getValue();
                 String offer = (String) dataSnapshot.child("offer").getValue();
                 String hitchId = (String) dataSnapshot.child("hitchId").getValue();
-                Offer offerInstance = new Offer(title,offer,"false",hitchId);
+                String uid = (String) dataSnapshot.child("uid").getValue();
+                Offer offerInstance = new Offer(title,offer,"false",hitchId,uid);
                 offerLinkedHashMap.put(title,offerInstance);
                 LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent("offers"));
 

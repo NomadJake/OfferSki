@@ -14,6 +14,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.List;
+import java.util.UUID;
 
 public class AddOfferActivity extends AppCompatActivity {
 
@@ -88,26 +89,10 @@ public class AddOfferActivity extends AppCompatActivity {
                 if(checkBox.isChecked()){
                     isDiscovered = "true";
                 }
+                String uid = UUID.randomUUID().toString();
 
-                Offer offer = new Offer(newTitle,newOffer,isDiscovered,newTag);
-                mDatabase.child("offers").child(offer.title).setValue(offer);
-
-
-
-//                    List<Offer> offers = Offer.findWithQuery(Offer.class, "where title = ?", title);
-//                    List<Offer> offers = Offer.find(Offer.class, "title = ?", title);
-//                    if (offers.size() > 0) {
-//
-//                        Offer offer = offers.get(0);
-//                        Log.d("got offer", "offer: " + offer.title);
-//                        offer.title = newTitle;
-//                        offer.Offer = newTag;
-//
-//                        offer.save();
-//                        mDatabase.child("offers").child(offer.title).setValue(offer);
-//
-//                    }
-
+                Offer offer = new Offer(newTitle,newOffer,isDiscovered,newTag,uid);
+                mDatabase.child("offers").child(offer.getUid()).setValue(offer);
                 finish();
 
 

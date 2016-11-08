@@ -67,7 +67,7 @@ public class AddNoteActivity extends AppCompatActivity {
                 String newTitle = etTitle.getText().toString();
                 String newNote = etNote.getText().toString();
                 Note note = new Note(newTitle, newNote);
-                mDatabase.child("notes").child(note.title).setValue(note);
+                mDatabase.child("notes").child(note.getUid()).setValue(note);
 //                /**
 //                 * TODO: Check if note exists before saving
 //                 */

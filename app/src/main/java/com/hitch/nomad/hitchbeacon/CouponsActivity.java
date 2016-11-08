@@ -131,7 +131,7 @@ public class CouponsActivity extends AppCompatActivity {
                 notes.remove(viewHolder.getAdapterPosition());
                 adapter.notifyItemRemoved(position);
                 initialCount -= 1;
-                mDatabase.child("notes").child(note.title).setValue(null);
+                mDatabase.child("notes").child(note.getUid()).setValue(null);
 
 
                 Snackbar.make(recyclerView, "Note deleted", Snackbar.LENGTH_SHORT)

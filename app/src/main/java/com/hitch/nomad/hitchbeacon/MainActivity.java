@@ -2,8 +2,10 @@ package com.hitch.nomad.hitchbeacon;
 //Developer : nomad
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
@@ -13,6 +15,7 @@ import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
@@ -56,25 +59,16 @@ public class MainActivity extends AppCompatActivity {
         Log.d("Main", "onCreate");
         recyclerView = (RecyclerView) findViewById(R.id.main_list);
         fab = (FloatingActionButton) findViewById(R.id.fab);
-//        buttonForOffers = (Button)findViewById(R.id.toggle_offers_button);
-//        buttonForOffers.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                startActivity(new Intent(MainActivity.this,CouponsActivity.class));
-//            }
-//        });
+
         StaggeredGridLayoutManager gridLayoutManager =
                 new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
         gridLayoutManager.setGapStrategy(StaggeredGridLayoutManager.GAP_HANDLING_MOVE_ITEMS_BETWEEN_SPANS);
         recyclerView.setLayoutManager(gridLayoutManager);
         mDatabase = FirebaseDatabase.getInstance().getReference();
-//        offers = new ArrayList<>(Hitchbeacon.offerLinkedHashMap.values());
         initialCount = 0;
         if (savedInstanceState != null)
             modifyPos = savedInstanceState.getInt("modify");
         if (initialCount >= 0) {
-
-//            offers = Offer.findWithQuery(Offer.class, "Select * from Offer where discovered = ?", "true");//Offer.listAll(Offer.class);
             try {
                 offers = new ArrayList<>(Hitchbeacon.offerLinkedHashMap.values());
             } catch (Exception e) {
@@ -85,7 +79,6 @@ public class MainActivity extends AppCompatActivity {
 
             if (offers.isEmpty())
                 Snackbar.make(recyclerView, "No offers added.", Snackbar.LENGTH_LONG).show();
-
         }
 
         // tinting FAB icon
@@ -124,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
 
 //                offer.delete();
                 initialCount -= 1;
-                mDatabase.child("offers").child(offer.title).setValue(null);
+                mDatabase.child("offers").child(offer.getUid()).setValue(null);
                 Snackbar.make(recyclerView, "Offer deleted", Snackbar.LENGTH_SHORT)
                         .setAction("UNDO", new View.OnClickListener() {
                             @Override
@@ -135,15 +128,11 @@ public class MainActivity extends AppCompatActivity {
                                 adapter.notifyItemInserted(position);
                                 initialCount += 1;
                             }
-                        })
-                        .show();
+                        }).show();
             }
-
         };
-
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
         itemTouchHelper.attachToRecyclerView(recyclerView);
-
 
         try {
             adapter.SetOnItemClickListener(new OffersAdapter.OnItemClickListener() {
@@ -151,7 +140,6 @@ public class MainActivity extends AppCompatActivity {
                 public void onItemClick(View view, int position) {
 
                     Log.d("Main", "click");
-
                     Intent i = new Intent(MainActivity.this, AddOfferActivity.class);
                     i.putExtra("isEditing", true);
                     i.putExtra("offer_title", offers.get(position).title);
@@ -167,11 +155,6 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-
-//        List<Offer> offers = Offer.findWithQuery(Offer.class, "Select title from Offer where title = ?", "%offer%");
-//        if (offers.size() > 0)
-//            Log.d("Offers", "offer: " + offers.get(0).title);
-
         Intent fcmrefresh = new Intent(this, MyFirebaseInstanceIDService.class);
         startService(fcmrefresh);
         if(!isMyServiceRunning(advertise.class)){
@@ -181,7 +164,7 @@ public class MainActivity extends AppCompatActivity {
                 public void run() {
                     Intent serviceIntetnt = new Intent(MainActivity.this,advertise.class);
                     serviceIntetnt.setAction("track");
-//                    startService(serviceIntetnt);
+                    startService(serviceIntetnt);
                 }
             }, 10000);
 
@@ -190,6 +173,9 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 
         setSupportActionBar(toolbar);
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
+                new IntentFilter("offers"));
 
     }
 
@@ -224,6 +210,9 @@ public class MainActivity extends AppCompatActivity {
             startActivity(new Intent(this,DealsActivity.class));
 
         }
+        if(id == R.id.refresh){
+            updateOffers();
+        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -243,33 +232,39 @@ public class MainActivity extends AppCompatActivity {
         modifyPos = savedInstanceState.getInt("modify");
     }
 
-//    @Override
-//    protected void onResume() {
-//        super.onResume();
-//
-//        final long newCount = offers.size();
-//
-//        if (newCount > initialCount) {
-//            // A offer is added
-//            Log.d("Main", "Adding new offer");
-//
-//            // Just load the last added offer (new)
-//            Offer offer = Offer.last(Offer.class);
-//
-//            if (offer.getDiscovered().equals("true")) {
-//                offers.add(offer);
-//                adapter.notifyItemInserted((int) newCount);
-//
-//                initialCount = newCount;
-//            }
-//        }
-//
-//        if (modifyPos != -1) {
-//            offers.set(modifyPos, Offer.listAll(Offer.class).get(modifyPos));
-//            adapter.notifyItemChanged(modifyPos);
-//        }
-//
-//    }
+    public void updateOffers(){
+        try {
+            List<Offer> allOffers = new ArrayList<>();
+            allOffers = new ArrayList<>(Hitchbeacon.offerLinkedHashMap.values());
+            if(allOffers.size() != 0){
+                offers.clear();
+            }
+            for(Offer offer : allOffers){
+                if(offer != null && offer.getDiscovered().equals("true")){
+                    offers.add(offer);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        adapter.notifyDataSetChanged();
+    }
+
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Get extra data included in the Intent
+            updateOffers();
+            Log.d("receiver", "Got Broadcast");
+        }
+    };
+
+    @Override
+    protected void onDestroy() {
+        // Unregister since the activity is about to be closed.
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
+        super.onDestroy();
+    }
 
     @SuppressLint("SimpleDateFormat")
     public static String getDateFormat(long date) {

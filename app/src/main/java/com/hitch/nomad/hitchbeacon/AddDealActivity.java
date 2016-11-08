@@ -59,7 +59,7 @@ public class AddDealActivity extends AppCompatActivity {
                 String newTitle = etTitle.getText().toString();
                 String newNote = etDeal.getText().toString();
                 Deals deal = new Deals(newTitle, newNote);
-                mDatabase.child("deals").child(deal.title).setValue(deal);
+                mDatabase.child("deals").child(deal.getUid()).setValue(deal);
                 finish();
             }
         });

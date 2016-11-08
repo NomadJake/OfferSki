@@ -9,9 +9,6 @@ import android.widget.TextView;
 
 import java.util.List;
 
-/**
- * Created by Suleiman19 on 2/13/16.
- */
 public class OffersAdapter extends RecyclerView.Adapter<OffersAdapter.OfferVH> {
     Context context;
     List<Offer> notes;
@@ -21,10 +18,7 @@ public class OffersAdapter extends RecyclerView.Adapter<OffersAdapter.OfferVH> {
     public OffersAdapter(Context context, List<Offer> notes) {
         this.context = context;
         this.notes = notes;
-
     }
-
-
     @Override
     public OfferVH onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.note_item, parent, false);

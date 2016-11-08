@@ -131,7 +131,7 @@ public class DealsActivity extends AppCompatActivity {
                 deals.remove(viewHolder.getAdapterPosition());
                 adapter.notifyItemRemoved(position);
                 initialCount -= 1;
-                mDatabase.child("deals").child(note.title).setValue(null);
+                mDatabase.child("deals").child(note.getUid()).setValue(null);
 
 
                 Snackbar.make(recyclerView, "Deals deleted", Snackbar.LENGTH_SHORT)

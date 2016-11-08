@@ -3,6 +3,8 @@ package com.hitch.nomad.hitchbeacon;
 import com.google.firebase.database.IgnoreExtraProperties;
 import com.orm.SugarRecord;
 
+import java.util.UUID;
+
 /**
  * Created by nomad on 1/21/16.
  */
@@ -12,23 +14,25 @@ public class Offer{
     String Offer;
     String discovered;
     String hitchId;
+    String uid;
 
     public Offer() {
     }
 
 
-    public Offer(String title, String Offer, String discovered, String hitchId) {
+    public Offer(String title, String Offer, String discovered, String hitchId,String uid) {
         this.title = title;
         this.Offer = Offer;
         this.discovered = discovered;
         this.hitchId = hitchId;
+        this.uid  = uid;
     }
 
-    public Offer(String title, String Offer) {
-        this.title = title;
-        this.Offer = Offer;
-        this.discovered = "false";
-    }
+//    public Offer(String title, String Offer) {
+//        this.title = title;
+//        this.Offer = Offer;
+//        this.discovered = "false";
+//    }
 
 
     public String getTitle() {
@@ -62,5 +66,10 @@ public class Offer{
     public void setHitchId(String hitchId) {
         this.hitchId = hitchId;
     }
+
+
+    public String getUid() {return uid;}
+
+    public void setUid(String uid) {this.uid = uid;}
 
 }
