@@ -446,7 +446,6 @@ public class advertise extends Service implements LeScanCallback {
                     foundHitch(min.getKey());
                 }
                 scannedDevices.clear();
-
             }
         }
     }

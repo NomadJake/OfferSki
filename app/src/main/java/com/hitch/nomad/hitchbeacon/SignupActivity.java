@@ -115,7 +115,7 @@ public class SignupActivity extends AppCompatActivity {
                                         user.age = "young";
                                     }
                                     mDatabase.child("users").child(auth.getCurrentUser().getUid()).setValue(user);
-                                    startActivity(new Intent(SignupActivity.this, MainActivity.class));
+                                    startActivity(new Intent(SignupActivity.this, IconTabsActivity.class));
                                     finish();
                                 }
                             }

@@ -26,7 +26,7 @@ public class MyMessagingService extends FirebaseMessagingService {
         Log.d(TAG,remoteMessage.getData().toString());
         if(remoteMessage.getData().get("type").equals("notification"))
         {
-            Intent notificationIntent = new Intent(this, MainActivity.class);
+            Intent notificationIntent = new Intent(this, IconTabsActivity.class);
             notificationIntent.setAction("main");
             notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                     | Intent.FLAG_ACTIVITY_CLEAR_TASK);

@@ -13,7 +13,7 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar">
         <activity android:name=".LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -26,6 +26,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <activity android:name=".IconTabsActivity"/>
         <activity android:name=".SignupActivity" />
         <activity android:name=".ResetPasswordActivity" />
         <activity android:name=".AddNoteActivity" />
@@ -57,8 +58,9 @@
 
         <activity android:name=".CouponsActivity" />
         <activity android:name=".AddOfferActivity" />
-        <activity android:name=".DealsActivity"></activity>
-        <activity android:name=".AddDealActivity"/>
+        <activity android:name=".DealsActivity" />
+        <activity android:name=".AddDealActivity" />
+        <activity android:name=".DetailedActivity"></activity>
     </application>
 
 </manifest>

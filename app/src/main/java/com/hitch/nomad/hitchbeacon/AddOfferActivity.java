@@ -66,8 +66,8 @@ public class AddOfferActivity extends AppCompatActivity {
 //        editingOffer = getIntent() != null;
         editingOffer = getIntent().getBooleanExtra("isEditing", false);
         if (editingOffer) {
-            title = getIntent().getStringExtra("offer_title");
-            offer = getIntent().getStringExtra("offer");
+            title = getIntent().getStringExtra("title");
+            offer = getIntent().getStringExtra("note");
             time = getIntent().getLongExtra("offer_time", 0);
 
             etTitle.setText(title);

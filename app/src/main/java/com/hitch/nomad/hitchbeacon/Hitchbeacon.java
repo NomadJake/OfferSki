@@ -50,7 +50,8 @@ public class Hitchbeacon extends Application {
                 String offer = (String) dataSnapshot.child("offer").getValue();
                 String hitchId = (String) dataSnapshot.child("hitchId").getValue();
                 String uid = (String) dataSnapshot.child("uid").getValue();
-                Offer offerInstance = new Offer(title,offer,"false",hitchId,uid);
+                String discovered = (String)dataSnapshot.child("discovered").getValue();
+                Offer offerInstance = new Offer(title,offer,discovered,hitchId,uid);
                 offerLinkedHashMap.put(title,offerInstance);
                 LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent("offers"));
 
@@ -58,6 +59,7 @@ public class Hitchbeacon extends Application {
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent("offers"));
 
             }
 
@@ -117,19 +119,57 @@ public class Hitchbeacon extends Application {
             }
         });
 
+//        mDatabase.child("deals").addChildEventListener(new ChildEventListener() {
+//            @Override
+//            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+//                String title = (String) dataSnapshot.child("title").getValue();
+//                String offer = (String) dataSnapshot.child("deal").getValue();
+//                Deals noteInstance = new Deals(title,offer);
+//                dealsLinkedHashMap.put(title,noteInstance);
+//                LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent("coupons"));
+//
+//            }
+//
+//            @Override
+//            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+//
+//            }
+//
+//            @Override
+//            public void onChildRemoved(DataSnapshot dataSnapshot) {
+//                String title = (String) dataSnapshot.child("title").getValue();
+//                dealsLinkedHashMap.remove(title);
+//                LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent("deals"));
+////                offerLinkedHashMap.put(title,offerInstance);
+//
+//
+//            }
+//
+//            @Override
+//            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+//
+//            }
+//
+//            @Override
+//            public void onCancelled(DatabaseError databaseError) {
+//
+//            }
+//        });
+
         mDatabase.child("deals").addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                String title = (String) dataSnapshot.child("title").getValue();
-                String offer = (String) dataSnapshot.child("deal").getValue();
-                Deals noteInstance = new Deals(title,offer);
-                dealsLinkedHashMap.put(title,noteInstance);
-                LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent("coupons"));
+                Deals thisDeal = dataSnapshot.getValue(Deals.class);
+                dealsLinkedHashMap.put(s,thisDeal);
+//                LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent("coupons"));
 
             }
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                Deals thisDeal = dataSnapshot.getValue(Deals.class);
+                String thisDealId = thisDeal.getUid();
+                dealsLinkedHashMap.put(thisDealId,thisDeal);
 
             }
 
@@ -156,7 +196,7 @@ public class Hitchbeacon extends Application {
 
         if(loggedin){
             sharedPreferences.edit().putBoolean(Constants.SIGNEDIN,true).apply(); //might cause shit
-            context.startActivity(new Intent(this,MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+            context.startActivity(new Intent(this,IconTabsActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
         }else {
             sharedPreferences.edit().putBoolean(Constants.SIGNEDIN,false).apply(); // might cause shit
             context.startActivity(new Intent(this,LoginActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
