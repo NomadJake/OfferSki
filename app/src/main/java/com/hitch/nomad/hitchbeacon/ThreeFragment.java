@@ -12,6 +12,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -35,12 +36,13 @@ public class ThreeFragment extends Fragment {
     FloatingActionButton fab;
 
     CouponAdapter adapter;
-    List<Note> deals = new ArrayList<>();
+    List<Note> coupons = new ArrayList<>();
 
     long initialCount;
 
     int modifyPos = -1;
     private DatabaseReference mDatabase;
+    private SwipeRefreshLayout mySwipeRefreshLayout;
 
     public ThreeFragment() {
         // Required empty public constructor
@@ -58,7 +60,7 @@ public class ThreeFragment extends Fragment {
 //        return inflater.inflate(R.layout.fragment_one, container, false);
         View view = inflater.inflate(R.layout.activity_main,container,false);
         Log.d("Main", "onCreate");
-
+        mySwipeRefreshLayout = (SwipeRefreshLayout)view.findViewById(R.id.swiperefresh);
         recyclerView = (RecyclerView) view.findViewById(R.id.list_coupons);
 
         StaggeredGridLayoutManager gridLayoutManager =
@@ -69,8 +71,8 @@ public class ThreeFragment extends Fragment {
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
         try {
-            deals = new ArrayList<>(Hitchbeacon.noteLinkedHashMap.values());
-            initialCount = deals.size();
+            coupons = new ArrayList<>(Hitchbeacon.noteLinkedHashMap.values());
+            initialCount = coupons.size();
 
         } catch (Exception e) {
             initialCount = 0;
@@ -83,17 +85,17 @@ public class ThreeFragment extends Fragment {
 
         if (initialCount >= 0) {
 
-//            deals = Note.findWithQuery(Note.class, "Select * from Note where discovered = ?", "true");//Note.listAll(Note.class);
+//            coupons = Note.findWithQuery(Note.class, "Select * from Note where discovered = ?", "true");//Note.listAll(Note.class);
             try {
-                deals = new ArrayList<>(Hitchbeacon.noteLinkedHashMap.values());
+                coupons = new ArrayList<>(Hitchbeacon.noteLinkedHashMap.values());
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            adapter = new CouponAdapter(getActivity(), deals);
+            adapter = new CouponAdapter(getActivity(), coupons);
             recyclerView.setAdapter(adapter);
 
-            if (deals.isEmpty())
-                Snackbar.make(recyclerView, "No deals added.", Snackbar.LENGTH_LONG).show();
+            if (coupons.isEmpty())
+                Snackbar.make(recyclerView, "No coupons added.", Snackbar.LENGTH_LONG).show();
 
         }
 
@@ -109,10 +111,26 @@ public class ThreeFragment extends Fragment {
 //        }
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
         itemTouchHelper.attachToRecyclerView(recyclerView);
+        mySwipeRefreshLayout.setOnRefreshListener(
+                new SwipeRefreshLayout.OnRefreshListener() {
+                    @Override
+                    public void onRefresh() {
+                        Log.i("swipe", "onRefresh called from SwipeRefreshLayout");
 
+                        // This method performs the actual data-refresh operation.
+                        // The method calls setRefreshing(false) when it's finished.
+                        List<Note> allOffers = new ArrayList<>();
+                        allOffers = new ArrayList<>(Hitchbeacon.noteLinkedHashMap.values());
+                        if(allOffers.size() != 0){
+                            coupons.clear();
+                        }
+                        for(Note offer : allOffers){
+                                coupons.add(offer);
 
-
-
+                        }
+                    }
+                }
+        );
         return view;
     }
 
@@ -131,11 +149,11 @@ public class ThreeFragment extends Fragment {
             //Remove swiped item from list and notify the RecyclerView
 
             final int position = viewHolder.getAdapterPosition();
-            final Note note = deals.get(viewHolder.getAdapterPosition());
-            deals.remove(viewHolder.getAdapterPosition());
+            final Note note = coupons.get(viewHolder.getAdapterPosition());
+            coupons.remove(viewHolder.getAdapterPosition());
             adapter.notifyItemRemoved(position);
             initialCount -= 1;
-            mDatabase.child("deals").child(note.getUid()).setValue(null);
+            mDatabase.child("coupons").child(note.getUid()).setValue(null);
 
 
             Snackbar.make(recyclerView, "Deals deleted", Snackbar.LENGTH_SHORT)
@@ -144,7 +162,7 @@ public class ThreeFragment extends Fragment {
                         public void onClick(View v) {
 
 //                                note.save();
-                            deals.add(position, note);
+                            coupons.add(position, note);
                             adapter.notifyItemInserted(position);
                             initialCount += 1;
 

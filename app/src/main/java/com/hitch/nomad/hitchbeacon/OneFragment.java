@@ -12,6 +12,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -41,6 +42,7 @@ public class OneFragment extends Fragment {
 
     int modifyPos = -1;
     private DatabaseReference mDatabase;
+    private SwipeRefreshLayout mySwipeRefreshLayout;
 
     public OneFragment() {
         // Required empty public constructor
@@ -57,6 +59,7 @@ public class OneFragment extends Fragment {
         // Inflate the layout for this fragment
 //        return inflater.inflate(R.layout.fragment_one, container, false);
         View view = inflater.inflate(R.layout.activity_deals,container,false);
+        mySwipeRefreshLayout = (SwipeRefreshLayout)view.findViewById(R.id.swiperefresh);
         Log.d("Main", "onCreate");
 
         recyclerView = (RecyclerView) view.findViewById(R.id.list_deals);
@@ -133,9 +136,33 @@ public class OneFragment extends Fragment {
             e.printStackTrace();
         }
 
+        mySwipeRefreshLayout.setOnRefreshListener(
+                new SwipeRefreshLayout.OnRefreshListener() {
+                    @Override
+                    public void onRefresh() {
+                        Log.i("swipe", "onRefresh called from SwipeRefreshLayout");
+
+                        // This method performs the actual data-refresh operation.
+                        // The method calls setRefreshing(false) when it's finished.
+                        List<Deals> allOffers = new ArrayList<>();
+                        allOffers = new ArrayList<>(Hitchbeacon.dealsLinkedHashMap.values());
+                        if(allOffers.size() != 0){
+                            deals.clear();
+                        }
+                        for(Deals offer : allOffers){
+                                deals.add(offer);
+
+                        }
+                    }
+                }
+        );
+
 
         return view;
     }
+
+
+
 
 
 

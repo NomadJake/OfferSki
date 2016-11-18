@@ -1,13 +1,21 @@
 package com.hitch.nomad.hitchbeacon;
 
+import android.app.ActivityManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +42,22 @@ public class IconTabsActivity extends AppCompatActivity {
         tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
         setupTabIcons();
+        Intent fcmrefresh = new Intent(this, MyFirebaseInstanceIDService.class);
+        startService(fcmrefresh);
+        if(!isMyServiceRunning(advertise.class)){
+            final Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    Intent serviceIntetnt = new Intent(IconTabsActivity.this,advertise.class);
+                    serviceIntetnt.setAction("track");
+                    startService(serviceIntetnt);
+                }
+            }, 5000);
+
+        }
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
+                new IntentFilter("offers"));
     }
 
     private void setupTabIcons() {
@@ -86,4 +110,22 @@ public class IconTabsActivity extends AppCompatActivity {
             return null;
         }
     }
+
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Get extra data included in the Intent
+            Log.d("receiver", "Got Broadcast");
+        }
+    };
 }

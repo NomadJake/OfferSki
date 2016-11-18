@@ -12,6 +12,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -35,12 +36,13 @@ public class TwoFragment extends Fragment {
     FloatingActionButton fab;
 
     OffersAdapter adapter;
-    List<Offer> deals = new ArrayList<>();
+    List<Offer> offers = new ArrayList<>();
 
     long initialCount;
 
     int modifyPos = -1;
     private DatabaseReference mDatabase;
+    private SwipeRefreshLayout mySwipeRefreshLayout;
 
     public TwoFragment() {
         // Required empty public constructor
@@ -57,6 +59,7 @@ public class TwoFragment extends Fragment {
         // Inflate the layout for this fragment
 //        return inflater.inflate(R.layout.fragment_one, container, false);
         View view = inflater.inflate(R.layout.activity_offers,container,false);
+        mySwipeRefreshLayout = (SwipeRefreshLayout)view.findViewById(R.id.swiperefresh);
         Log.d("Main", "onCreate");
 
         recyclerView = (RecyclerView) view.findViewById(R.id.list_offer);
@@ -69,8 +72,8 @@ public class TwoFragment extends Fragment {
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
         try {
-            deals = new ArrayList<>(Hitchbeacon.offerLinkedHashMap.values());
-            initialCount = deals.size();
+            offers = new ArrayList<>(Hitchbeacon.offerLinkedHashMap.values());
+            initialCount = offers.size();
 
         } catch (Exception e) {
             initialCount = 0;
@@ -83,17 +86,17 @@ public class TwoFragment extends Fragment {
 
         if (initialCount >= 0) {
 
-//            deals = Note.findWithQuery(Note.class, "Select * from Note where discovered = ?", "true");//Note.listAll(Note.class);
+//            offers = Note.findWithQuery(Note.class, "Select * from Note where discovered = ?", "true");//Note.listAll(Note.class);
             try {
-                deals = new ArrayList<>(Hitchbeacon.offerLinkedHashMap.values());
+                offers = new ArrayList<>(Hitchbeacon.offerLinkedHashMap.values());
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            adapter = new OffersAdapter(getActivity(), deals);
+            adapter = new OffersAdapter(getActivity(), offers);
             recyclerView.setAdapter(adapter);
 
-            if (deals.isEmpty())
-                Snackbar.make(recyclerView, "No deals added.", Snackbar.LENGTH_LONG).show();
+            if (offers.isEmpty())
+                Snackbar.make(recyclerView, "No offers added.", Snackbar.LENGTH_LONG).show();
 
         }
 
@@ -119,8 +122,8 @@ public class TwoFragment extends Fragment {
                     Log.d("Main", "click");
                     Intent i = new Intent(getContext(), DetailedActivity.class);
                     i.putExtra("isEditing", true);
-                    i.putExtra("title", deals.get(position).title);
-                    i.putExtra("note", deals.get(position).Offer);
+                    i.putExtra("title", offers.get(position).title);
+                    i.putExtra("note", offers.get(position).Offer);
 
 
                     modifyPos = position;
@@ -131,6 +134,27 @@ public class TwoFragment extends Fragment {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        mySwipeRefreshLayout.setOnRefreshListener(
+                new SwipeRefreshLayout.OnRefreshListener() {
+                    @Override
+                    public void onRefresh() {
+                        Log.i("swipe", "onRefresh called from SwipeRefreshLayout");
+
+                        // This method performs the actual data-refresh operation.
+                        // The method calls setRefreshing(false) when it's finished.
+                        List<Offer> allOffers = new ArrayList<>();
+                        allOffers = new ArrayList<>(Hitchbeacon.offerLinkedHashMap.values());
+                        if(allOffers.size() != 0){
+                            offers.clear();
+                        }
+                        for(Offer offer : allOffers){
+                            if(offer.getDiscovered().equals("true")){
+                                offers.add(offer);
+                            }
+                        }
+                    }
+                }
+        );
         return view;
     }
 
@@ -149,11 +173,11 @@ public class TwoFragment extends Fragment {
             //Remove swiped item from list and notify the RecyclerView
 
             final int position = viewHolder.getAdapterPosition();
-            final Offer note = deals.get(viewHolder.getAdapterPosition());
-            deals.remove(viewHolder.getAdapterPosition());
+            final Offer note = offers.get(viewHolder.getAdapterPosition());
+            offers.remove(viewHolder.getAdapterPosition());
             adapter.notifyItemRemoved(position);
             initialCount -= 1;
-            mDatabase.child("deals").child(note.getUid()).setValue(null);
+            mDatabase.child("offers").child(note.getUid()).setValue(null);
 
 
             Snackbar.make(recyclerView, "Deals deleted", Snackbar.LENGTH_SHORT)
@@ -162,7 +186,7 @@ public class TwoFragment extends Fragment {
                         public void onClick(View v) {
 
 //                                note.save();
-                            deals.add(position, note);
+                            offers.add(position, note);
                             adapter.notifyItemInserted(position);
                             initialCount += 1;
 
@@ -186,8 +210,8 @@ public class TwoFragment extends Fragment {
 //
 //                Intent i = new Intent(DealsActivity.this, AddNoteActivity.class);
 //                i.putExtra("isEditing", true);
-//                i.putExtra("note_title", deals.get(position).title);
-//                i.putExtra("note", deals.get(position).deal);
+//                i.putExtra("note_title", offers.get(position).title);
+//                i.putExtra("note", offers.get(position).deal);
 //
 //                modifyPos = position;
 //

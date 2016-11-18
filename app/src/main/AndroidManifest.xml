@@ -26,7 +26,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".IconTabsActivity"/>
+        <activity android:name=".IconTabsActivity" />
         <activity android:name=".SignupActivity" />
         <activity android:name=".ResetPasswordActivity" />
         <activity android:name=".AddNoteActivity" />
@@ -60,7 +60,8 @@
         <activity android:name=".AddOfferActivity" />
         <activity android:name=".DealsActivity" />
         <activity android:name=".AddDealActivity" />
-        <activity android:name=".DetailedActivity"></activity>
+        <activity android:name=".DetailedActivity" />
+        <activity android:name=".OtpAuth"></activity>
     </application>
 
 </manifest>
