@@ -14,14 +14,14 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-        <activity android:name=".LoginActivity">
+        <activity android:name=".OtpAuth">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MainActivity">
+        <activity android:name=".LoginActivity">
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
@@ -56,12 +56,9 @@
             android:name="DOMAIN_PACKAGE_NAME"
             android:value="com.hitch.nomad.hitchbeacon" />
 
-        <activity android:name=".CouponsActivity" />
         <activity android:name=".AddOfferActivity" />
-        <activity android:name=".DealsActivity" />
         <activity android:name=".AddDealActivity" />
         <activity android:name=".DetailedActivity" />
-        <activity android:name=".OtpAuth"></activity>
     </application>
 
 </manifest>
