@@ -10,6 +10,7 @@ public class User {
     public String age;
     public String sex;
 
+
     public User() {
         // Default constructor required for calls to DataSnapshot.getValue(User.class)
     }

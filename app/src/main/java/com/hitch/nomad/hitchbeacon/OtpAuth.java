@@ -1,6 +1,8 @@
 package com.hitch.nomad.hitchbeacon;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,6 +19,8 @@ import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,18 +28,25 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.hitch.nomad.hitchbeacon.Hitchbeacon.context;
+
 public class OtpAuth extends AppCompatActivity {
 
-    private static final String REGISTER_URL = "http://138.197.198.152/android_sms/request_sms.php";
-    public EditText editTextMobile,editTextOtp;
+    User user;
+
+    private static final String REGISTER_URL = "http://138.68.81.101/exc/sendOTP";
+    public EditText editTextMobile,editTextOtp, editTextmf,editTextage;
     public Button verifyButton, proceedButton;
-    private String urlVerifyOtp = "http://138.197.198.152/android_sms/verify_otp.php";
+    private String urlVerifyOtp = "http://138.68.81.101/exc/verifyOTP";
+    private DatabaseReference mDatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_otp_auth);
         editTextMobile = (EditText) findViewById(R.id.editTextMobil);
+        editTextmf = (EditText) findViewById(R.id.editTextMF);
+        editTextage = (EditText) findViewById(R.id.editTextAge);
         verifyButton = (Button) findViewById(R.id.buttonSubmitMobil);
         proceedButton = (Button) findViewById(R.id.buttonVerify);
         editTextOtp = (EditText)findViewById(R.id.editTextVerify);
@@ -51,12 +62,18 @@ public class OtpAuth extends AppCompatActivity {
                 registerUser();
             }
         });
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+
+
     }
 
     private void registerUser() {
 
         final String mobile = editTextMobile.getText().toString().trim();
-
+        final String mf = editTextmf.getText().toString().trim();
+        final String age = editTextage.getText().toString().trim();
+        user = new User(mobile,age,mf);
         StringRequest stringRequest = new StringRequest(Request.Method.POST, REGISTER_URL,
                 new Response.Listener<String>() {
                     @Override
@@ -73,8 +90,8 @@ public class OtpAuth extends AppCompatActivity {
             @Override
             protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<String, String>();
-                params.put("name", "ofrskyuser");
-                params.put("email", "ofrskyuser@hitch.com");
+                params.put("mf", mf);
+                params.put("age", age);
                 params.put("mobile", mobile);
                 return params;
             }
@@ -94,29 +111,35 @@ public class OtpAuth extends AppCompatActivity {
             public void onResponse(String responseString) {
                 Log.d("verifyOtp", responseString.toString());
                 JSONObject response = null;
+                Boolean success;
                 try {
                     response = new JSONObject(responseString);
+                    success = response.getBoolean("success");
                     Log.d("json",response.toString());
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                try {
-                    String error = response.getString("error");
-                    if (error.equals("true")) {
-                        Toast.makeText(OtpAuth.this, "Wrong OTP", Toast.LENGTH_LONG).show();
-                    } else {
+                if (response != null) {
+                    try {
+                            Boolean successB = response.getBoolean("success");
+                        if (successB==true) {
+                            Hitchbeacon.user = user;
+                            Hitchbeacon.setListners();
+                            mDatabase.child("users").child(user.email).setValue(user);
+                            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+                            sharedPreferences.edit().putString("email",user.email).apply();
+                            Hitchbeacon.loggedin=true;
+                            Hitchbeacon.setLoggedin();
+                            startActivity(new Intent(OtpAuth.this, IconTabsActivity.class));
+                            finish();
+                        }
 
-                        JSONObject userJsonobject = response.getJSONObject("profile");
-                        String name = userJsonobject.getString("name");
-                        startActivity(new Intent(OtpAuth.this, IconTabsActivity.class));
-                        finish();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Toast.makeText(getApplicationContext(),
+                                "Error: " + e.getMessage(),
+                                Toast.LENGTH_LONG).show();
                     }
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    Toast.makeText(getApplicationContext(),
-                            "Error: " + e.getMessage(),
-                            Toast.LENGTH_LONG).show();
                 }
             }
         }, new Response.ErrorListener() {

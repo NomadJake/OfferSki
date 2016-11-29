@@ -1,16 +1,21 @@
 package com.hitch.nomad.hitchbeacon;
 
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
@@ -28,6 +33,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import static com.hitch.nomad.hitchbeacon.Hitchbeacon.context;
 
 
 public class ThreeFragment extends Fragment {
@@ -99,6 +106,17 @@ public class ThreeFragment extends Fragment {
 
         }
 
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Intent serviceIntetnt = new Intent(context,advertise.class);
+                serviceIntetnt.setAction("track");
+//                    context.startService(serviceIntetnt);
+                adapter.notifyDataSetChanged();
+            }
+        }, 5000);
+
         // tinting FAB icon
 //        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
 //
@@ -111,6 +129,26 @@ public class ThreeFragment extends Fragment {
 //        }
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
         itemTouchHelper.attachToRecyclerView(recyclerView);
+        try {
+            adapter.SetOnItemClickListener(new CouponAdapter.OnItemClickListener() {
+                @Override
+                public void onItemClick(View view, int position) {
+
+                    Log.d("Main", "click");
+                    Intent i = new Intent(getContext(), DetailedActivity.class);
+                    i.putExtra("isEditing", true);
+                    i.putExtra("title", coupons.get(position).title);
+                    i.putExtra("note", coupons.get(position).note);
+
+
+                    modifyPos = position;
+
+                    startActivity(i);
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         mySwipeRefreshLayout.setOnRefreshListener(
                 new SwipeRefreshLayout.OnRefreshListener() {
                     @Override
@@ -131,7 +169,34 @@ public class ThreeFragment extends Fragment {
                     }
                 }
         );
+        LocalBroadcastManager.getInstance(getContext()).registerReceiver(mMessageReceiver,
+                new IntentFilter("coupons"));
         return view;
+    }
+
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Get extra data included in the Intent
+            updateOffers();
+            Log.d("receiver", "Got Broadcast");
+        }
+    };
+
+    public void updateOffers(){
+        try {
+            List<Note> allOffers = new ArrayList<>();
+            allOffers = new ArrayList<>(Hitchbeacon.noteLinkedHashMap.values());
+            if(allOffers.size() != 0){
+                coupons.clear();
+            }
+            for(Note offer : allOffers){
+                    coupons.add(offer);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        adapter.notifyDataSetChanged();
     }
 
 

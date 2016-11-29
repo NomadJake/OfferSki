@@ -15,27 +15,10 @@
         android:layout_height="wrap_content"
         android:inputType="phone"
         android:ems="10"
+        android:hint="Phone number"
         android:layout_alignParentTop="true"
         android:layout_alignParentStart="true"
         android:id="@+id/editTextMobil" />
-
-    <Button
-        android:text="Submit"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/editTextMobil"
-        android:layout_marginTop="34dp"
-        android:id="@+id/buttonSubmitMobil" />
-
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="phone"
-        android:ems="10"
-        android:layout_below="@+id/buttonSubmitMobil"
-        android:layout_alignEnd="@+id/editTextMobil"
-        android:layout_marginTop="160dp"
-        android:id="@+id/editTextVerify" />
 
     <Button
         android:text="Proceed"
@@ -45,4 +28,44 @@
         android:layout_alignParentStart="true"
         android:layout_marginTop="62dp"
         android:id="@+id/buttonVerify" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="textPersonName"
+        android:hint="M/F"
+        android:ems="10"
+        android:layout_below="@+id/editTextMobil"
+        android:layout_alignEnd="@+id/editTextMobil"
+        android:id="@+id/editTextMF" />
+
+    <Button
+        android:text="Submit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="134dp"
+        android:id="@+id/buttonSubmitMobil"
+        android:layout_below="@+id/editTextMF"
+        android:layout_alignParentStart="true" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="phone"
+        android:ems="10"
+        android:hint="Enter OTP"
+        android:layout_marginTop="85dp"
+        android:id="@+id/editTextVerify"
+        android:layout_below="@+id/buttonSubmitMobil"
+        android:layout_alignParentStart="true" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="textPersonName"
+        android:hint="Age"
+        android:ems="10"
+        android:layout_below="@+id/editTextMF"
+        android:layout_alignParentStart="true"
+        android:id="@+id/editTextAge" />
 </RelativeLayout>

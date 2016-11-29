@@ -10,18 +10,25 @@ import java.util.UUID;
  */
 @IgnoreExtraProperties
 public class Note {
-    String uid;
+    String shopURI;
     String title;
     String note;
+    String segment;
+    String logoURI;
+    String code;
+    Boolean discovered;
 
     public Note() {
     }
 
-
-    public Note(String title, String note) {
+    public Note(String title, String note, String segment,String shopURI,String logoURI, String code,Boolean discovered) {
         this.title = title;
         this.note = note;
-        this.uid  = UUID.randomUUID().toString();
+        this.shopURI  = shopURI;
+        this.segment = segment;
+        this.logoURI = logoURI;
+        this.code = code;
+        this.discovered = discovered;
     }
 
     public String getTitle() {
@@ -41,11 +48,51 @@ public class Note {
     }
 
     public String getUid() {
-        return uid;
+        return shopURI;
     }
 
     public void setUid(String uid) {
-        this.uid = uid;
+        this.shopURI = uid;
+    }
+
+    public String getSegment() {
+        return segment;
+    }
+
+    public void setSegment(String segment) {
+        this.segment = segment;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public String getShopURI() {
+        return shopURI;
+    }
+
+    public void setShopURI(String shopURI) {
+        this.shopURI = shopURI;
+    }
+
+    public String getLogoURI() {
+        return logoURI;
+    }
+
+    public void setLogoURI(String logoURI) {
+        this.logoURI = logoURI;
+    }
+
+    public Boolean getDiscovered() {
+        return discovered;
+    }
+
+    public void setDiscovered(Boolean discovered) {
+        this.discovered = discovered;
     }
 
 

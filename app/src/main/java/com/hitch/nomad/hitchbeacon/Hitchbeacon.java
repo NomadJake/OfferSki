@@ -13,6 +13,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.LinkedHashMap;
@@ -27,8 +28,8 @@ public class Hitchbeacon extends Application {
     public static LinkedHashMap<String,Offer> offerLinkedHashMap;
     public static LinkedHashMap<String,Note> noteLinkedHashMap;
     public static LinkedHashMap<String,Deals> dealsLinkedHashMap;
-    Context context;
-    private DatabaseReference mDatabase;
+    static Context context;
+    private static DatabaseReference mDatabase;
     private FirebaseAuth auth;
 
 
@@ -43,32 +44,68 @@ public class Hitchbeacon extends Application {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         loggedin = sharedPreferences.getBoolean(Constants.SIGNEDIN,false);
         mDatabase = FirebaseDatabase.getInstance().getReference();
-        mDatabase.child("offers").addChildEventListener(new ChildEventListener() {
+        try {
+            getUser();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if(loggedin){
+            if(user==null)
+                getUser();
+//            setListners();
+//            context.startActivity(new Intent(this,IconTabsActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        }else {
+            sharedPreferences.edit().putBoolean(Constants.SIGNEDIN,false).apply(); // might cause shit
+//            context.startActivity(new Intent(this,OtpAuth.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+
+        }
+
+    }
+
+    public static void setLoggedin(){
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        sharedPreferences.edit().putBoolean(Constants.SIGNEDIN,true).apply();
+    }
+
+    public static void setListners(){
+        Query queryRef = mDatabase.child("offers").orderByChild("segment").equalTo(getSegment(user));
+        queryRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                String title = (String) dataSnapshot.child("title").getValue();
-                String offer = (String) dataSnapshot.child("offer").getValue();
-                String hitchId = (String) dataSnapshot.child("hitchId").getValue();
-                String uid = (String) dataSnapshot.child("uid").getValue();
-                String discovered = (String)dataSnapshot.child("discovered").getValue();
-                Offer offerInstance = new Offer(title,offer,discovered,hitchId,uid);
-                offerLinkedHashMap.put(title,offerInstance);
-                LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent("offers"));
+//                String title = (String) dataSnapshot.child("title").getValue();
+//                String offer = (String) dataSnapshot.child("offer").getValue();
+//                String hitchId = (String) dataSnapshot.child("hitchId").getValue();
+//                String segment = (String) dataSnapshot.child("segment").getValue();
+//                String uid = (String) dataSnapshot.child("logo").getValue();
+//                Boolean discovered = (Boolean)dataSnapshot.child("discovered").getValue();
+//                Offer offerInstance = new Offer(title,offer,discovered,hitchId,uid,segment);
+                Offer offerInstance = dataSnapshot.getValue(Offer.class);
+                offerLinkedHashMap.put(s,offerInstance);
+                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent("offers"));
 
             }
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent("offers"));
+//                String title = (String) dataSnapshot.child("title").getValue();
+//                String offer = (String) dataSnapshot.child("offer").getValue();
+//                String hitchId = (String) dataSnapshot.child("hitchId").getValue();
+//                String segment = (String) dataSnapshot.child("segment").getValue();
+//                String uid = (String) dataSnapshot.child("logo").getValue();
+//                Boolean discovered = (Boolean)dataSnapshot.child("discovered").getValue();
+//                Offer offerInstance = new Offer(title,offer,discovered,hitchId,uid,segment);
+                Offer offerInstance = dataSnapshot.getValue(Offer.class);
+                offerLinkedHashMap.put(s,offerInstance);
+                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent("offers"));
 
             }
 
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
-                String title = (String) dataSnapshot.child("title").getValue();
-                offerLinkedHashMap.remove(title);
-                LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent("offers"));
-
+//                String title = (String) dataSnapshot.child("title").getValue();
+                Offer offerInstance = dataSnapshot.getValue(Offer.class);
+                offerLinkedHashMap.remove(offerInstance);
+                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent("offers"));
 
             }
 
@@ -83,15 +120,16 @@ public class Hitchbeacon extends Application {
             }
         });
 
-        mDatabase.child("notes").addChildEventListener(new ChildEventListener() {
+        Query queryRefNotes = mDatabase.child("notes").orderByChild("segment").equalTo(getSegment(user));
+        queryRefNotes.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                String title = (String) dataSnapshot.child("title").getValue();
-                String offer = (String) dataSnapshot.child("note").getValue();
-                Note noteInstance = new Note(title,offer);
-                noteLinkedHashMap.put(title,noteInstance);
-                LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent("coupons"));
-
+//                String title = (String) dataSnapshot.child("title").getValue();
+//                String offer = (String) dataSnapshot.child("note").getValue();
+//                Note noteInstance = new Note(title,offer);
+                Note note = dataSnapshot.getValue(Note.class);
+                noteLinkedHashMap.put(s,note);
+                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent("coupons"));
             }
 
             @Override
@@ -103,8 +141,7 @@ public class Hitchbeacon extends Application {
             public void onChildRemoved(DataSnapshot dataSnapshot) {
                 String title = (String) dataSnapshot.child("title").getValue();
                 noteLinkedHashMap.remove(title);
-                LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent("coupons"));
-
+                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent("coupons"));
 
             }
 
@@ -118,68 +155,27 @@ public class Hitchbeacon extends Application {
 
             }
         });
+    }
 
-//        mDatabase.child("deals").addChildEventListener(new ChildEventListener() {
-//            @Override
-//            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-//                String title = (String) dataSnapshot.child("title").getValue();
-//                String offer = (String) dataSnapshot.child("deal").getValue();
-//                Deals noteInstance = new Deals(title,offer);
-//                dealsLinkedHashMap.put(title,noteInstance);
-//                LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent("coupons"));
-//
-//            }
-//
-//            @Override
-//            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-//
-//            }
-//
-//            @Override
-//            public void onChildRemoved(DataSnapshot dataSnapshot) {
-//                String title = (String) dataSnapshot.child("title").getValue();
-//                dealsLinkedHashMap.remove(title);
-//                LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent("deals"));
-////                offerLinkedHashMap.put(title,offerInstance);
-//
-//
-//            }
-//
-//            @Override
-//            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-//
-//            }
-//
-//            @Override
-//            public void onCancelled(DatabaseError databaseError) {
-//
-//            }
-//        });
-
-        mDatabase.child("deals").addChildEventListener(new ChildEventListener() {
+    public static void getUser(){
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String email = sharedPreferences.getString("email",null);
+        Query queryRefUser = mDatabase.child("users").orderByChild("email").equalTo(email);
+        queryRefUser.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                Deals thisDeal = dataSnapshot.getValue(Deals.class);
-                dealsLinkedHashMap.put(s,thisDeal);
-//                LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent("coupons"));
-
+                User userInstance = dataSnapshot.getValue(User.class);
+                user = userInstance;
+                setListners();
             }
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                Deals thisDeal = dataSnapshot.getValue(Deals.class);
-                String thisDealId = thisDeal.getUid();
-                dealsLinkedHashMap.put(thisDealId,thisDeal);
 
             }
 
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
-                String title = (String) dataSnapshot.child("title").getValue();
-                dealsLinkedHashMap.remove(title);
-                LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent("deals"));
-//                offerLinkedHashMap.put(title,offerInstance);
-
 
             }
 
@@ -193,14 +189,23 @@ public class Hitchbeacon extends Application {
 
             }
         });
-
-        if(loggedin){
-            sharedPreferences.edit().putBoolean(Constants.SIGNEDIN,true).apply(); //might cause shit
-            context.startActivity(new Intent(this,IconTabsActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-        }else {
-            sharedPreferences.edit().putBoolean(Constants.SIGNEDIN,false).apply(); // might cause shit
-            context.startActivity(new Intent(this,LoginActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-
-        }
     }
+
+    public static String getSegment(User user){
+        String ageString = user.age;
+        String sex = user.sex;
+        String segment = "A";
+        int age = Integer.parseInt(ageString);
+        if (age<25 && sex.equals('m')){
+            segment = "A";
+        }else if(age >= 25 && sex.equals('f')){
+            segment = "B";
+        }else if(age >= 25 && sex.equals('m')){
+            segment = "C";
+        }else if(age < 25 && sex.equals('f')){
+            segment = "D";
+        }
+        return segment;
+    }
+
 }

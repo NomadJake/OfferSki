@@ -1,7 +1,10 @@
 package com.hitch.nomad.hitchbeacon;
 
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
@@ -11,6 +14,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
@@ -95,6 +99,8 @@ public class TwoFragment extends Fragment {
             adapter = new OffersAdapter(getActivity(), offers);
             recyclerView.setAdapter(adapter);
 
+            LocalBroadcastManager.getInstance(getContext()).registerReceiver(mMessageReceiver,
+                    new IntentFilter("offers"));
             if (offers.isEmpty())
                 Snackbar.make(recyclerView, "No offers added.", Snackbar.LENGTH_LONG).show();
 
@@ -148,7 +154,7 @@ public class TwoFragment extends Fragment {
                             offers.clear();
                         }
                         for(Offer offer : allOffers){
-                            if(offer.getDiscovered().equals("true")){
+                            if(offer.getDiscovered().equals(true)){
                                 offers.add(offer);
                             }
                         }
@@ -196,6 +202,41 @@ public class TwoFragment extends Fragment {
         }
 
     };
+
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Get extra data included in the Intent
+            updateOffers();
+            Log.d("receiver", "Got Broadcast");
+        }
+    };
+
+    public void updateOffers(){
+        try {
+            List<Offer> allOffers = new ArrayList<>();
+            allOffers = new ArrayList<>(Hitchbeacon.offerLinkedHashMap.values());
+            if(allOffers.size() != 0){
+                offers.clear();
+            }
+            for(Offer offer : allOffers){
+                if(offer.getDiscovered().equals(true)){
+                    offers.add(offer);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        adapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(mMessageReceiver);
+        super.onDestroy();
+    }
+
 
 //    ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
 //    itemTouchHelper.attachToRecyclerView(recyclerView);

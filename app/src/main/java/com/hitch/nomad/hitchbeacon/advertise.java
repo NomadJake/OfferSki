@@ -2,8 +2,12 @@ package com.hitch.nomad.hitchbeacon;
 //Developer : nomad
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import android.app.Notification;
@@ -72,6 +76,7 @@ public class advertise extends Service implements LeScanCallback {
     private String oldHitchId = "rosieNips";
 
     List<Offer> offers = new ArrayList<>();
+    List<Note> coupons = new ArrayList<>();
     private FirebaseAuth auth;
     private DatabaseReference mDatabase;
 
@@ -156,19 +161,13 @@ public class advertise extends Service implements LeScanCallback {
             if (scanThread == null || !scanThread.isAlive()) {
                 mBluetoothAdapter.enable();
                 scanThread = new TrackThread();
+                Timer timer = new Timer();
+                timer.schedule(new SayHello(), 0, 15*60*1000);
                 scanThread.start();
                 scanArrayList = new ArrayList<>();
             }
 
         }
-//        new Handler().postDelayed(new Runnable() {
-//
-//            @Override
-//            public void run() {
-//                Offer gift = new Offer("Title","Offer","discovered","hitchuid");
-//                gift.save();
-//            }
-//        }, 300000);
         return START_NOT_STICKY;
     }
 
@@ -347,32 +346,45 @@ public class advertise extends Service implements LeScanCallback {
         return minIdx;
     }
 
+//    public static void printMap(Map mp) {
+//        Iterator it = mp.entrySet().iterator();
+//        while (it.hasNext()) {
+//            Map.Entry pair = (Map.Entry)it.next();
+//            System.out.println(pair.getKey() + " = " + pair.getValue());
+//            it.remove(); // avoids a ConcurrentModificationException
+//        }
+//    }
+
     public void foundHitch(String hitchId){
-        offers = new ArrayList<>(Hitchbeacon.offerLinkedHashMap.values());//Offer.findWithQuery(Offer.class, "Select * from Offer where offer = ?", hitchId);
-        if (offers.size() != 0) {
-            for(Offer offer : offers){
-                String hid = offer.getHitchId();
-                Log.d(hid,"hid");
-                if(!hid.equals(null)&&hid.equals(hitchId)&&!offer.getDiscovered().equals("true")){
-                    notifyUser(offer);
-                    try {
-                        offer.setDiscovered("true");
-                        Hitchbeacon.offerLinkedHashMap.put(offer.getTitle(),offer);
-                        mDatabase.child("offers").child(offer.getUid()).child("discovered").setValue("true");
-                        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent("offers"));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
+        Iterator it = Hitchbeacon.offerLinkedHashMap.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry pair = (Map.Entry)it.next();
+            System.out.println(pair.getKey() + " = " + pair.getValue());
+            Offer offer = (Offer) pair.getValue();
+            String hid = offer.getHitchId();
+            Log.d(hid,"hid");
+            if(!(hid==null)&&hid.equals(hitchId)&&!offer.getDiscovered().equals(true)){
+                notifyUser(offer.title,offer.getOffer());
+//                try {
+//                    offer.setDiscovered(true);
+//                    mDatabase.child("offers").child((String) pair.getKey()).child("discovered").setValue(true);
+//                    LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent("offers"));
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
             }
+            it.remove(); // avoids a ConcurrentModificationException
         }
+        offers = new ArrayList<>(Hitchbeacon.offerLinkedHashMap.values());//Offer.findWithQuery(Offer.class, "Select * from Offer where offer = ?", hitchId);
+
     }
 
-    public void notifyUser(Offer found_offer){
+    public void notifyUser(String title,String description){
         Intent doneIntent = new Intent(this,advertise.class);
         doneIntent.setAction("done");
 //        doneIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-        doneIntent.putExtra("brand",found_offer.getTitle());
+        doneIntent.putExtra("title",title);
+        doneIntent.putExtra("note",description);
         PendingIntent pendingDoneIntent = PendingIntent.getService(this, 0,
                 doneIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
@@ -387,8 +399,8 @@ public class advertise extends Service implements LeScanCallback {
 
         builder = new NotificationCompat.Builder(getApplicationContext());
 
-        builder.setContentTitle("You found a new coupon !");
-        builder.setContentText(found_offer.getOffer());
+        builder.setContentTitle(title);
+        builder.setContentText(description);
         builder.setSmallIcon(R.drawable.ic_add_24dp);
         builder.setLargeIcon(Bitmap.createScaledBitmap(icon, 200, 200, false));
         builder.setOngoing(true);
@@ -403,12 +415,7 @@ public class advertise extends Service implements LeScanCallback {
         Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notificationSound);
         r.play();
 
-//        if (!oldHitchId.equals(hitchId) && alive ) {
-//            Uri notificationSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-//            Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notificationSound);
-//            r.play();
-//        }
-//        oldHitchId = hitchId;
+
 
         startForeground(101,
                 stateHolderNotification);
@@ -449,6 +456,36 @@ public class advertise extends Service implements LeScanCallback {
             }
         }
     }
+
+    class SayHello extends TimerTask {
+        public void run() {
+            Boolean notified = false;
+            coupons = new ArrayList<>(Hitchbeacon.noteLinkedHashMap.values());
+            Iterator it = Hitchbeacon.noteLinkedHashMap.entrySet().iterator();
+            while (it.hasNext()&&!notified) {
+                Map.Entry pair = (Map.Entry)it.next();
+                if (pair.getKey()!=null) {
+                    System.out.println(pair.getKey() + " = " + pair.getValue());
+                    Log.d("PAIR",pair.getKey().toString());
+                    Note offer = (Note) pair.getValue();
+                    if (offer!=null) {
+                        if(offer.discovered==false){
+                            notifyUser(offer.title,offer.note);
+                            notified = true;
+                            offer.discovered = true;
+    //                        mDatabase.child("notes").child((String) pair.getKey()).child("discovered").setValue(true);
+                            LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent("notes"));
+                        }
+                    }
+                }
+                it.remove(); // avoids a ConcurrentModificationException
+            }
+
+        }
+    }
+
+    // And From your main() method or any other method
+
 
 }
 

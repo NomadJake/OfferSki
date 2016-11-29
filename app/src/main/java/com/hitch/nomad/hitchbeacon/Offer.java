@@ -12,27 +12,25 @@ import java.util.UUID;
 public class Offer{
     String title;
     String Offer;
-    String discovered;
+    Boolean discovered;
     String hitchId;
     String uid;
+    String logoURI;
+    String segment;
 
     public Offer() {
     }
 
-
-    public Offer(String title, String Offer, String discovered, String hitchId,String uid) {
+    public Offer(String title, String Offer, Boolean discovered, String hitchId,String uid,String segment, String logoURI) {
         this.title = title;
         this.Offer = Offer;
         this.discovered = discovered;
         this.hitchId = hitchId;
         this.uid  = uid;
+        this.segment = segment;
+        this.logoURI = logoURI;
     }
 
-//    public Offer(String title, String Offer) {
-//        this.title = title;
-//        this.Offer = Offer;
-//        this.discovered = "false";
-//    }
 
 
     public String getTitle() {
@@ -51,13 +49,6 @@ public class Offer{
         this.Offer = Offer;
     }
 
-    public String getDiscovered() {
-        return discovered;
-    }
-
-    public void setDiscovered(String discovered) {
-        this.discovered = discovered;
-    }
 
     public String getHitchId() {
         return hitchId;
@@ -68,8 +59,32 @@ public class Offer{
     }
 
 
+    public String getLogoURI() {
+        return logoURI;
+    }
+
+    public void setLogoURI(String logoURI) {
+        this.logoURI = logoURI;
+    }
+
+    public String getSegment() {
+        return segment;
+    }
+
+    public void setSegment(String segment) {
+        this.segment = segment;
+    }
+
     public String getUid() {return uid;}
 
     public void setUid(String uid) {this.uid = uid;}
+
+    public Boolean getDiscovered() {
+        return discovered;
+    }
+
+    public void setDiscovered(Boolean discovered) {
+        this.discovered = discovered;
+    }
 
 }
