@@ -6,7 +6,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.TextUtils;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.Volley;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -31,13 +36,14 @@ public class Hitchbeacon extends Application {
     static Context context;
     private static DatabaseReference mDatabase;
     private FirebaseAuth auth;
-
+    private static Hitchbeacon mInstance;
 
     @Override
     public void onCreate() {
         super.onCreate();
         context = getApplicationContext();
         auth = FirebaseAuth.getInstance();
+        mInstance = this;
         offerLinkedHashMap = new LinkedHashMap<>();
         noteLinkedHashMap = new LinkedHashMap<>();
         dealsLinkedHashMap = new LinkedHashMap<>();
@@ -196,16 +202,68 @@ public class Hitchbeacon extends Application {
         String sex = user.sex;
         String segment = "A";
         int age = Integer.parseInt(ageString);
-        if (age<25 && sex.equals('m')){
+        if (age<25 && sex.equals("m")){
             segment = "A";
-        }else if(age >= 25 && sex.equals('f')){
-            segment = "B";
-        }else if(age >= 25 && sex.equals('m')){
-            segment = "C";
-        }else if(age < 25 && sex.equals('f')){
+        }else if(age >= 25 && sex.equals("f")){
             segment = "D";
+        }else if(age >= 25 && sex.equals("m")){
+            segment = "C";
+        }else if(age < 25 && sex.equals("f")){
+            segment = "B";
         }
         return segment;
+    }
+
+    public static final String TAG = Hitchbeacon.class.getSimpleName();
+
+    private RequestQueue mRequestQueue;
+    private ImageLoader mImageLoader;
+    LruBitmapCache mLruBitmapCache;
+
+
+
+    public static synchronized Hitchbeacon getInstance() {
+        return mInstance;
+    }
+
+    public RequestQueue getRequestQueue() {
+        if (mRequestQueue == null) {
+            mRequestQueue = Volley.newRequestQueue(getApplicationContext());
+        }
+
+        return mRequestQueue;
+    }
+
+    public ImageLoader getImageLoader() {
+        getRequestQueue();
+        if (mImageLoader == null) {
+            getLruBitmapCache();
+            mImageLoader = new ImageLoader(this.mRequestQueue, mLruBitmapCache);
+        }
+
+        return this.mImageLoader;
+    }
+
+    public LruBitmapCache getLruBitmapCache() {
+        if (mLruBitmapCache == null)
+            mLruBitmapCache = new LruBitmapCache();
+        return this.mLruBitmapCache;
+    }
+
+    public <T> void addToRequestQueue(Request<T> req, String tag) {
+        req.setTag(TextUtils.isEmpty(tag) ? TAG : tag);
+        getRequestQueue().add(req);
+    }
+
+    public <T> void addToRequestQueue(Request<T> req) {
+        req.setTag(TAG);
+        getRequestQueue().add(req);
+    }
+
+    public void cancelPendingRequests(Object tag) {
+        if (mRequestQueue != null) {
+            mRequestQueue.cancelAll(tag);
+        }
     }
 
 }

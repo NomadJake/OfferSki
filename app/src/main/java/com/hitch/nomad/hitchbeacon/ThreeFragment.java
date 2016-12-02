@@ -44,6 +44,8 @@ public class ThreeFragment extends Fragment {
 
     CouponAdapter adapter;
     List<Note> coupons = new ArrayList<>();
+    List<Note> couponsToShow = new ArrayList<>();
+    String TAG = "coupons";
 
     long initialCount;
 
@@ -66,7 +68,7 @@ public class ThreeFragment extends Fragment {
         // Inflate the layout for this fragment
 //        return inflater.inflate(R.layout.fragment_one, container, false);
         View view = inflater.inflate(R.layout.activity_main,container,false);
-        Log.d("Main", "onCreate");
+        Log.d(TAG, "onCreate");
         mySwipeRefreshLayout = (SwipeRefreshLayout)view.findViewById(R.id.swiperefresh);
         recyclerView = (RecyclerView) view.findViewById(R.id.list_coupons);
 
@@ -86,47 +88,21 @@ public class ThreeFragment extends Fragment {
             e.printStackTrace();
         }
 
-        if (savedInstanceState != null)
-            modifyPos = savedInstanceState.getInt("modify");
-
-
-        if (initialCount >= 0) {
-
-//            coupons = Note.findWithQuery(Note.class, "Select * from Note where discovered = ?", "true");//Note.listAll(Note.class);
             try {
                 coupons = new ArrayList<>(Hitchbeacon.noteLinkedHashMap.values());
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            adapter = new CouponAdapter(getActivity(), coupons);
+        for(Note c:coupons){
+            if(c.discovered==true){
+                couponsToShow.add(c);
+            }
+        }
+            adapter = new CouponAdapter(getActivity(), couponsToShow);
+            updateOffers();
             recyclerView.setAdapter(adapter);
 
-            if (coupons.isEmpty())
-                Snackbar.make(recyclerView, "No coupons added.", Snackbar.LENGTH_LONG).show();
 
-        }
-
-        final Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                Intent serviceIntetnt = new Intent(context,advertise.class);
-                serviceIntetnt.setAction("track");
-//                    context.startService(serviceIntetnt);
-                adapter.notifyDataSetChanged();
-            }
-        }, 5000);
-
-        // tinting FAB icon
-//        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-//
-//            Drawable drawable = ContextCompat.getDrawable(getContext(), R.drawable.ic_add_24dp);
-//            drawable = DrawableCompat.wrap(drawable);
-//            DrawableCompat.setTint(drawable, Color.WHITE);
-//            DrawableCompat.setTintMode(drawable, PorterDuff.Mode.SRC_IN);
-//
-//            fab.setImageDrawable(drawable);
-//        }
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
         itemTouchHelper.attachToRecyclerView(recyclerView);
         try {
@@ -134,11 +110,12 @@ public class ThreeFragment extends Fragment {
                 @Override
                 public void onItemClick(View view, int position) {
 
-                    Log.d("Main", "click");
+                    Log.d(TAG, "click");
                     Intent i = new Intent(getContext(), DetailedActivity.class);
                     i.putExtra("isEditing", true);
                     i.putExtra("title", coupons.get(position).title);
                     i.putExtra("note", coupons.get(position).note);
+                    i.putExtra("URL", coupons.get(position).getShopURI());
 
 
                     modifyPos = position;
@@ -153,7 +130,7 @@ public class ThreeFragment extends Fragment {
                 new SwipeRefreshLayout.OnRefreshListener() {
                     @Override
                     public void onRefresh() {
-                        Log.i("swipe", "onRefresh called from SwipeRefreshLayout");
+                        Log.i(TAG, "onRefresh called from SwipeRefreshLayout");
 
                         // This method performs the actual data-refresh operation.
                         // The method calls setRefreshing(false) when it's finished.
@@ -179,23 +156,27 @@ public class ThreeFragment extends Fragment {
         public void onReceive(Context context, Intent intent) {
             // Get extra data included in the Intent
             updateOffers();
-            Log.d("receiver", "Got Broadcast");
+            Log.d("receiver", "Got Broadcast for notes");
         }
     };
 
     public void updateOffers(){
         try {
-            List<Note> allOffers = new ArrayList<>();
+            List<Note> allOffers;// = new ArrayList<>();
             allOffers = new ArrayList<>(Hitchbeacon.noteLinkedHashMap.values());
             if(allOffers.size() != 0){
                 coupons.clear();
             }
             for(Note offer : allOffers){
+
+                if (offer.getDiscovered()==true) {
                     coupons.add(offer);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+        Log.d(TAG,"updateOffers called.");
         adapter.notifyDataSetChanged();
     }
 
@@ -218,7 +199,7 @@ public class ThreeFragment extends Fragment {
             coupons.remove(viewHolder.getAdapterPosition());
             adapter.notifyItemRemoved(position);
             initialCount -= 1;
-            mDatabase.child("coupons").child(note.getUid()).setValue(null);
+//            mDatabase.child("coupons").child(note.getUid()).setValue(null);
 
 
             Snackbar.make(recyclerView, "Deals deleted", Snackbar.LENGTH_SHORT)

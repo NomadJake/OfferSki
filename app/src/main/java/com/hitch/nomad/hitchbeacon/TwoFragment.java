@@ -130,7 +130,7 @@ public class TwoFragment extends Fragment {
                     i.putExtra("isEditing", true);
                     i.putExtra("title", offers.get(position).title);
                     i.putExtra("note", offers.get(position).Offer);
-
+                    i.putExtra("URL", offers.get(position).getUid());
 
                     modifyPos = position;
 
@@ -236,32 +236,5 @@ public class TwoFragment extends Fragment {
         LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(mMessageReceiver);
         super.onDestroy();
     }
-
-
-//    ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
-//    itemTouchHelper.attachToRecyclerView(recyclerView);
-//
-//
-//    try {
-//        adapter.SetOnItemClickListener(new DealsAdapter.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(View view, int position) {
-//
-//                Log.d("Main", "click");
-//
-//                Intent i = new Intent(DealsActivity.this, AddNoteActivity.class);
-//                i.putExtra("isEditing", true);
-//                i.putExtra("note_title", offers.get(position).title);
-//                i.putExtra("note", offers.get(position).deal);
-//
-//                modifyPos = position;
-//
-//                startActivity(i);
-//            }
-//        });
-//    } catch (Exception e) {
-//        e.printStackTrace();
-//    }
-//
 
 }

@@ -162,11 +162,10 @@ public class advertise extends Service implements LeScanCallback {
                 mBluetoothAdapter.enable();
                 scanThread = new TrackThread();
                 Timer timer = new Timer();
-                timer.schedule(new SayHello(), 0, 15*60*1000);
+                timer.schedule(new SayHello(), 0, 5*60*1000);
                 scanThread.start();
                 scanArrayList = new ArrayList<>();
             }
-
         }
         return START_NOT_STICKY;
     }
@@ -346,14 +345,6 @@ public class advertise extends Service implements LeScanCallback {
         return minIdx;
     }
 
-//    public static void printMap(Map mp) {
-//        Iterator it = mp.entrySet().iterator();
-//        while (it.hasNext()) {
-//            Map.Entry pair = (Map.Entry)it.next();
-//            System.out.println(pair.getKey() + " = " + pair.getValue());
-//            it.remove(); // avoids a ConcurrentModificationException
-//        }
-//    }
 
     public void foundHitch(String hitchId){
         Iterator it = Hitchbeacon.offerLinkedHashMap.entrySet().iterator();
@@ -364,14 +355,14 @@ public class advertise extends Service implements LeScanCallback {
             String hid = offer.getHitchId();
             Log.d(hid,"hid");
             if(!(hid==null)&&hid.equals(hitchId)&&!offer.getDiscovered().equals(true)){
-                notifyUser(offer.title,offer.getOffer());
-//                try {
-//                    offer.setDiscovered(true);
-//                    mDatabase.child("offers").child((String) pair.getKey()).child("discovered").setValue(true);
-//                    LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent("offers"));
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
+                notifyUser(offer.title,offer.getOffer(),offer.getLogoURI());
+                try {
+                    offer.setDiscovered(true);
+                    mDatabase.child("offers").child((String) pair.getKey()).child("discovered").setValue(true);
+                    LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent("offers"));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
             it.remove(); // avoids a ConcurrentModificationException
         }
@@ -379,12 +370,13 @@ public class advertise extends Service implements LeScanCallback {
 
     }
 
-    public void notifyUser(String title,String description){
-        Intent doneIntent = new Intent(this,advertise.class);
+    public void notifyUser(String title,String description,String image){
+        Intent doneIntent = new Intent(this,DetailedActivity.class);
         doneIntent.setAction("done");
 //        doneIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         doneIntent.putExtra("title",title);
         doneIntent.putExtra("note",description);
+        doneIntent.putExtra("URL",image);
         PendingIntent pendingDoneIntent = PendingIntent.getService(this, 0,
                 doneIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
@@ -470,10 +462,10 @@ public class advertise extends Service implements LeScanCallback {
                     Note offer = (Note) pair.getValue();
                     if (offer!=null) {
                         if(offer.discovered==false){
-                            notifyUser(offer.title,offer.note);
+                            notifyUser(offer.title,offer.note,offer.logoURI);
                             notified = true;
                             offer.discovered = true;
-    //                        mDatabase.child("notes").child((String) pair.getKey()).child("discovered").setValue(true);
+                            mDatabase.child("notes").child((String) pair.getKey()).child("discovered").setValue(true);
                             LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent("notes"));
                         }
                     }

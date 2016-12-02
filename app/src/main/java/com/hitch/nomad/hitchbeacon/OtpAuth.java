@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RadioButton;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -39,17 +40,19 @@ public class OtpAuth extends AppCompatActivity {
     public Button verifyButton, proceedButton;
     private String urlVerifyOtp = "http://138.68.81.101/exc/verifyOTP";
     private DatabaseReference mDatabase;
+    private RadioButton female;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_otp_auth);
         editTextMobile = (EditText) findViewById(R.id.editTextMobil);
-        editTextmf = (EditText) findViewById(R.id.editTextMF);
+//        editTextmf = (EditText) findViewById(R.id.editTextMF);
         editTextage = (EditText) findViewById(R.id.editTextAge);
         verifyButton = (Button) findViewById(R.id.buttonSubmitMobil);
         proceedButton = (Button) findViewById(R.id.buttonVerify);
         editTextOtp = (EditText)findViewById(R.id.editTextVerify);
+        female = (RadioButton)findViewById(R.id.femaleRB);
         proceedButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -71,7 +74,13 @@ public class OtpAuth extends AppCompatActivity {
     private void registerUser() {
 
         final String mobile = editTextMobile.getText().toString().trim();
-        final String mf = editTextmf.getText().toString().trim();
+        final String mf;// = editTextmf.getText().toString().trim();
+
+        if(female.isChecked()){
+            mf = "f";
+        }else {
+            mf = "m";
+        }
         final String age = editTextage.getText().toString().trim();
         user = new User(mobile,age,mf);
         StringRequest stringRequest = new StringRequest(Request.Method.POST, REGISTER_URL,
