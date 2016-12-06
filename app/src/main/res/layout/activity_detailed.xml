@@ -23,7 +23,11 @@
         android:layout_gravity="center"
         android:id="@+id/imageView" />
 
-
+    <TextView
+        android:text=" "
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/textViewCode" />
 
 
 </LinearLayout>

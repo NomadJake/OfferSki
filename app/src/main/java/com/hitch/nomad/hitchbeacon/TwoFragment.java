@@ -131,6 +131,7 @@ public class TwoFragment extends Fragment {
                     i.putExtra("title", offers.get(position).title);
                     i.putExtra("note", offers.get(position).Offer);
                     i.putExtra("URL", offers.get(position).getUid());
+                    i.putExtra("code"," ");
 
                     modifyPos = position;
 
@@ -207,7 +208,7 @@ public class TwoFragment extends Fragment {
         @Override
         public void onReceive(Context context, Intent intent) {
             // Get extra data included in the Intent
-            updateOffers();
+//            updateOffers();
             Log.d("receiver", "Got Broadcast");
         }
     };

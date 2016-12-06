@@ -41,13 +41,14 @@ public class OtpAuth extends AppCompatActivity {
     private String urlVerifyOtp = "http://138.68.81.101/exc/verifyOTP";
     private DatabaseReference mDatabase;
     private RadioButton female;
+    public EditText nameET;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_otp_auth);
         editTextMobile = (EditText) findViewById(R.id.editTextMobil);
-//        editTextmf = (EditText) findViewById(R.id.editTextMF);
+        nameET = (EditText)findViewById(R.id.editTextName);
         editTextage = (EditText) findViewById(R.id.editTextAge);
         verifyButton = (Button) findViewById(R.id.buttonSubmitMobil);
         proceedButton = (Button) findViewById(R.id.buttonVerify);
@@ -82,7 +83,8 @@ public class OtpAuth extends AppCompatActivity {
             mf = "m";
         }
         final String age = editTextage.getText().toString().trim();
-        user = new User(mobile,age,mf);
+        final String name = nameET.getText().toString();
+        user = new User(mobile,age,mf,name);
         StringRequest stringRequest = new StringRequest(Request.Method.POST, REGISTER_URL,
                 new Response.Listener<String>() {
                     @Override

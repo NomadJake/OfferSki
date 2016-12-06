@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -100,6 +101,7 @@ public class Hitchbeacon extends Application {
 //                String uid = (String) dataSnapshot.child("logo").getValue();
 //                Boolean discovered = (Boolean)dataSnapshot.child("discovered").getValue();
 //                Offer offerInstance = new Offer(title,offer,discovered,hitchId,uid,segment);
+                Log.d("Change","changed");
                 Offer offerInstance = dataSnapshot.getValue(Offer.class);
                 offerLinkedHashMap.put(s,offerInstance);
                 LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent("offers"));
@@ -205,9 +207,9 @@ public class Hitchbeacon extends Application {
         if (age<25 && sex.equals("m")){
             segment = "A";
         }else if(age >= 25 && sex.equals("f")){
-            segment = "D";
-        }else if(age >= 25 && sex.equals("m")){
             segment = "C";
+        }else if(age >= 25 && sex.equals("m")){
+            segment = "D";
         }else if(age < 25 && sex.equals("f")){
             segment = "B";
         }

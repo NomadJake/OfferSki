@@ -9,16 +9,18 @@ public class User {
     public String email;
     public String age;
     public String sex;
+    public String name;
 
 
     public User() {
         // Default constructor required for calls to DataSnapshot.getValue(User.class)
     }
 
-    public User(String email, String age, String sex) {
+    public User(String email, String age, String sex, String name) {
         this.email = email;
         this.age = age;
         this.sex = sex;
+        this.name = name;
     }
 
 }

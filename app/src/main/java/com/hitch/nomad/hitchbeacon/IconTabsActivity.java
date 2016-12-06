@@ -35,7 +35,7 @@ public class IconTabsActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private TabLayout tabLayout;
     private ViewPager viewPager;
-    private PendingIntent pendingIntent;
+    private PendingIntent pendingIntent,pendingIntentToStop;
     long backPressedTime = 0;
 
 
@@ -57,7 +57,9 @@ public class IconTabsActivity extends AppCompatActivity {
         Hitchbeacon.setListners();
         final Intent serviceIntent = new Intent(getApplicationContext(),advertise.class);
         Intent alarmIntent = new Intent(IconTabsActivity.this, AlarmReceiver.class);
+        Intent stopAlarmIntent = new Intent(IconTabsActivity.this,AlarmStopper.class);
         pendingIntent = PendingIntent.getBroadcast(IconTabsActivity.this, 0, alarmIntent, 0);
+        pendingIntentToStop = PendingIntent.getBroadcast(IconTabsActivity.this,0,stopAlarmIntent,0);
         Intent fcmrefresh = new Intent(this, MyFirebaseInstanceIDService.class);
         startService(fcmrefresh);
         if(!isMyServiceRunning(advertise.class)){
@@ -199,6 +201,7 @@ public class IconTabsActivity extends AppCompatActivity {
         int interval = 8000;
         manager.setRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime(),
                 2*60*60,pendingIntent);
+//        manager.set(AlarmManager.ELAPSED_REALTIME,AlarmManager.INTERVAL_HOUR,pendingIntentToStop);
         Toast.makeText(this, "Alarm Set", Toast.LENGTH_SHORT).show();
     }
     public void startAt10() {

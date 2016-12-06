@@ -116,7 +116,7 @@ public class ThreeFragment extends Fragment {
                     i.putExtra("title", coupons.get(position).title);
                     i.putExtra("note", coupons.get(position).note);
                     i.putExtra("URL", coupons.get(position).getShopURI());
-
+                    i.putExtra("code",coupons.get(position).getCode());
 
                     modifyPos = position;
 
@@ -147,7 +147,7 @@ public class ThreeFragment extends Fragment {
                 }
         );
         LocalBroadcastManager.getInstance(getContext()).registerReceiver(mMessageReceiver,
-                new IntentFilter("coupons"));
+                new IntentFilter("notes"));
         return view;
     }
 
