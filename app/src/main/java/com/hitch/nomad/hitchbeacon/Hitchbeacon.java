@@ -62,7 +62,7 @@ public class Hitchbeacon extends Application {
 //            setListners();
 //            context.startActivity(new Intent(this,IconTabsActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
         }else {
-            sharedPreferences.edit().putBoolean(Constants.SIGNEDIN,false).apply(); // might cause shit
+            sharedPreferences.edit().putBoolean(Constants.SIGNEDIN,false).commit(); // might cause shit
 //            context.startActivity(new Intent(this,OtpAuth.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
 
         }
@@ -71,7 +71,7 @@ public class Hitchbeacon extends Application {
 
     public static void setLoggedin(){
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        sharedPreferences.edit().putBoolean(Constants.SIGNEDIN,true).apply();
+        sharedPreferences.edit().putBoolean(Constants.SIGNEDIN,true).commit();
     }
 
     public static void setListners(){
@@ -179,7 +179,8 @@ public class Hitchbeacon extends Application {
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
+                User userInstance = dataSnapshot.getValue(User.class);
+                user = userInstance;
             }
 
             @Override

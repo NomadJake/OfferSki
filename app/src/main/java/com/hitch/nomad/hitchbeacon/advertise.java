@@ -43,6 +43,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import static com.hitch.nomad.hitchbeacon.Hitchbeacon.user;
+
 public class advertise extends Service implements LeScanCallback {
 
 
@@ -164,7 +166,7 @@ public class advertise extends Service implements LeScanCallback {
                 scanThread = new TrackThread();
                 couponThread = new SayHello();
                 couponThread.start();
-//                scanThread.start();
+                scanThread.start();
                 scanArrayList = new ArrayList<>();
             }
         }
@@ -353,20 +355,25 @@ public class advertise extends Service implements LeScanCallback {
             Offer offer = entry.getValue();
             String hid = offer.getHitchId();
             Log.d(hid,"hid");
-            if(hid.equals(hitchId) && (offer.getDiscovered().equals(false))){
-                Log.d("offerfound","hitch found ... notifying user");
-                notifyUser(offer.title,offer.getOffer(),offer.getLogoURI());
-                try {
-                    offer.setDiscovered(true);
-                    Hitchbeacon.offerLinkedHashMap.put(key,offer);
-                    Log.d("push","push");
+            if(hid.equals(hitchId)){
+                if(!user.discoveredOffers.contains(offer.getOffer())){
+                    Log.d("offerfound","hitch found ... notifying user");
+                    notifyUser(offer.title,offer.getOffer(),offer.getLogoURI());
+                    try {
+//                        offer.setDiscovered(true);
+//                        Hitchbeacon.offerLinkedHashMap.put(key,offer);
+                        user.discoveredOffers.add(offer.getOffer());
+                        mDatabase.child("users").child(user.email).setValue(user);
+                        Log.d("push","push");
 //                    mDatabase.child("offers").child(key).child("discovered").setValue(true);
-//                    LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent("offers"));
-                } catch (Exception e) {
-                    e.printStackTrace();
+                    LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent("offers"));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }
+
 //        Iterator it = Hitchbeacon.offerLinkedHashMap.entrySet().iterator();
 //        while (it.hasNext()) {
 //            Map.Entry pair = (Map.Entry)it.next();
@@ -416,19 +423,17 @@ public class advertise extends Service implements LeScanCallback {
         builder.setContentText(description);
         builder.setSmallIcon(R.drawable.ic_add_24dp);
         builder.setLargeIcon(Bitmap.createScaledBitmap(icon, 200, 200, false));
-        builder.setOngoing(false);
-        builder.setPriority(Notification.PRIORITY_HIGH);
+//        builder.setPriority(Notification.PRIORITY_HIGH);
         builder.setContentIntent(pendingDoneIntent);
-        builder.setAutoCancel(true);
+//        builder.setOngoing(false);
+//        builder.setAutoCancel(false);
         stateHolderNotification = builder.build();
+
 
         Uri notificationSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notificationSound);
         r.play();
-
-
-
-        startForeground(101,
+        startForeground(131,
                 stateHolderNotification);
     }
 
@@ -437,7 +442,9 @@ public class advertise extends Service implements LeScanCallback {
         @Override
         public void run() {
             super.run();
-
+            if(Hitchbeacon.user==null){
+                stopSelf();
+            }
             while (alive) {
                 Log.d(TAG,"Tracking thread running...");
                 startScan();
@@ -470,29 +477,30 @@ public class advertise extends Service implements LeScanCallback {
     class SayHello extends Thread {
         public void run() {
             super.run();
-            while (true) {
+            while (true&&Hitchbeacon.user!=null) {
                 Log.d("SayHello", "said hello");
                 Boolean notified = false;
                 coupons = new ArrayList<>(Hitchbeacon.noteLinkedHashMap.values());
-                Iterator it = Hitchbeacon.noteLinkedHashMap.entrySet().iterator();
-                while (it.hasNext() && !notified) {
-                    Map.Entry pair = (Map.Entry) it.next();
-                    if (pair.getKey() != null) {
-                        System.out.println(pair.getKey() + " = " + pair.getValue());
-                        Log.d("PAIR", pair.getKey().toString());
-                        Note offer = (Note) pair.getValue();
-                        if (offer != null) {
-                            if (offer.discovered == false) {
-                                notifyUser(offer.title, offer.note, offer.logoURI);
-                                notified = true;
-                                offer.discovered = true;
-                                mDatabase.child("notes").child((String) pair.getKey()).child("discovered").setValue(true);
-                                Log.d("HMKey", (String) pair.getKey());
-                                LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent("notes"));
-                            }
-                        }
+                Random rn = new Random();
+                int range = coupons.size();
+                Note testNote = null;
+                try {
+                    int randomNum =  rn.nextInt(range);
+                    testNote = coupons.get(randomNum);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                if (testNote!=null) {
+                    if (!user.discoveredNotes.contains(testNote.getNote())) {
+                        notifyUser(testNote.title, testNote.note, testNote.logoURI);
+                        notified = true;
+    //                    testNote.discovered = true;
+                        user.discoveredNotes.add(testNote.getNote());
+                        mDatabase.child("users").child(user.email).setValue(user);
+    //                                mDatabase.child("notes").child((String) pair.getKey()).child("discovered").setValue(true);
+    //                    Log.d("HMKey", (String) getKeyFromValue(Hitchbeacon.noteLinkedHashMap,testNote));
+                        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent("notes"));
                     }
-                    it.remove(); // avoids a ConcurrentModificationException
                 }
                 try {
                     Thread.currentThread().sleep(1 * 60000);
@@ -500,6 +508,14 @@ public class advertise extends Service implements LeScanCallback {
                     e.printStackTrace();
                 }
             }
+        }
+        public Object getKeyFromValue(Map hm, Object value) {
+            for (Object o : hm.keySet()) {
+                if (hm.get(o).equals(value)) {
+                    return o;
+                }
+            }
+            return null;
         }
     }
 

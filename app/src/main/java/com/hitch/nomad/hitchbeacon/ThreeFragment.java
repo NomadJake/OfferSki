@@ -94,7 +94,7 @@ public class ThreeFragment extends Fragment {
                 e.printStackTrace();
             }
         for(Note c:coupons){
-            if(c.discovered==true){
+            if(Hitchbeacon.user.discoveredNotes.contains(c.getNote())){
                 couponsToShow.add(c);
             }
         }
@@ -165,12 +165,12 @@ public class ThreeFragment extends Fragment {
             List<Note> allOffers;// = new ArrayList<>();
             allOffers = new ArrayList<>(Hitchbeacon.noteLinkedHashMap.values());
             if(allOffers.size() != 0){
-                coupons.clear();
+                couponsToShow.clear();
             }
             for(Note offer : allOffers){
 
-                if (offer.getDiscovered()==true) {
-                    coupons.add(offer);
+                if (Hitchbeacon.user.discoveredNotes.contains(offer.getNote())) {
+                    couponsToShow.add(offer);
                 }
             }
         } catch (Exception e) {
@@ -194,27 +194,27 @@ public class ThreeFragment extends Fragment {
         public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
             //Remove swiped item from list and notify the RecyclerView
 
-            final int position = viewHolder.getAdapterPosition();
-            final Note note = coupons.get(viewHolder.getAdapterPosition());
-            coupons.remove(viewHolder.getAdapterPosition());
-            adapter.notifyItemRemoved(position);
-            initialCount -= 1;
-//            mDatabase.child("coupons").child(note.getUid()).setValue(null);
-
-
-            Snackbar.make(recyclerView, "Deals deleted", Snackbar.LENGTH_SHORT)
-                    .setAction("UNDO", new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-
-//                                note.save();
-                            coupons.add(position, note);
-                            adapter.notifyItemInserted(position);
-                            initialCount += 1;
-
-                        }
-                    })
-                    .show();
+//            final int position = viewHolder.getAdapterPosition();
+//            final Note note = coupons.get(viewHolder.getAdapterPosition());
+//            coupons.remove(viewHolder.getAdapterPosition());
+//            adapter.notifyItemRemoved(position);
+//            initialCount -= 1;
+////            mDatabase.child("coupons").child(note.getUid()).setValue(null);
+//
+//
+//            Snackbar.make(recyclerView, "Deals deleted", Snackbar.LENGTH_SHORT)
+//                    .setAction("UNDO", new View.OnClickListener() {
+//                        @Override
+//                        public void onClick(View v) {
+//
+////                                note.save();
+//                            coupons.add(position, note);
+//                            adapter.notifyItemInserted(position);
+//                            initialCount += 1;
+//
+//                        }
+//                    })
+//                    .show();
         }
 
     };

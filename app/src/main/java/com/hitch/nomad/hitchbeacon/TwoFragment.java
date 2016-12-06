@@ -179,55 +179,55 @@ public class TwoFragment extends Fragment {
         public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
             //Remove swiped item from list and notify the RecyclerView
 
-            final int position = viewHolder.getAdapterPosition();
-            final Offer note = offers.get(viewHolder.getAdapterPosition());
-            offers.remove(viewHolder.getAdapterPosition());
-            adapter.notifyItemRemoved(position);
-            initialCount -= 1;
-            mDatabase.child("offers").child(note.getUid()).setValue(null);
-
-
-            Snackbar.make(recyclerView, "Deals deleted", Snackbar.LENGTH_SHORT)
-                    .setAction("UNDO", new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-
-//                                note.save();
-                            offers.add(position, note);
-                            adapter.notifyItemInserted(position);
-                            initialCount += 1;
-
-                        }
-                    })
-                    .show();
+//            final int position = viewHolder.getAdapterPosition();
+//            final Offer note = offers.get(viewHolder.getAdapterPosition());
+//            offers.remove(viewHolder.getAdapterPosition());
+//            adapter.notifyItemRemoved(position);
+//            initialCount -= 1;
+//            mDatabase.child("offers").child(note.getUid()).setValue(null);
+//
+//
+//            Snackbar.make(recyclerView, "Deals deleted", Snackbar.LENGTH_SHORT)
+//                    .setAction("UNDO", new View.OnClickListener() {
+//                        @Override
+//                        public void onClick(View v) {
+//
+////                                note.save();
+//                            offers.add(position, note);
+//                            adapter.notifyItemInserted(position);
+//                            initialCount += 1;
+//
+//                        }
+//                    })
+//                    .show();
         }
-
     };
 
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             // Get extra data included in the Intent
-//            updateOffers();
-            Log.d("receiver", "Got Broadcast");
+            updateOffers();
+            Log.d("receiver", "Got Broadcast for offers");
         }
     };
 
     public void updateOffers(){
-        try {
-            List<Offer> allOffers = new ArrayList<>();
-            allOffers = new ArrayList<>(Hitchbeacon.offerLinkedHashMap.values());
-            if(allOffers.size() != 0){
-                offers.clear();
-            }
-            for(Offer offer : allOffers){
-                if(offer.getDiscovered().equals(true)){
-                    offers.add(offer);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        offers = new ArrayList<>(Hitchbeacon.offerLinkedHashMap.values());
+//        try {
+//            List<Offer> allOffers = new ArrayList<>();
+//            allOffers = new ArrayList<>(Hitchbeacon.offerLinkedHashMap.values());
+//            if(allOffers.size() != 0){
+//                offers.clear();
+//            }
+//            for(Offer offer : allOffers){
+//                if(Hitchbeacon.user.discoveredOffers.contains(offer)){
+//                    offers.add(offer);
+//                }
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
         adapter.notifyDataSetChanged();
     }
 

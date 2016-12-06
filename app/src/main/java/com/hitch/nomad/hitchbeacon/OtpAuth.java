@@ -26,7 +26,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static com.hitch.nomad.hitchbeacon.Hitchbeacon.context;
@@ -46,7 +48,7 @@ public class OtpAuth extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_otp_auth);
+        setContentView(R.layout.login_new);
         editTextMobile = (EditText) findViewById(R.id.editTextMobil);
         nameET = (EditText)findViewById(R.id.editTextName);
         editTextage = (EditText) findViewById(R.id.editTextAge);
@@ -84,12 +86,18 @@ public class OtpAuth extends AppCompatActivity {
         }
         final String age = editTextage.getText().toString().trim();
         final String name = nameET.getText().toString();
-        user = new User(mobile,age,mf,name);
+        Offer dummyoffer = new Offer("asd","asdf",false,"asdf","asdf","asdf","A");
+        Note dummynote = new Note("asd","asdf","A","asdf","asdf","asdf",false);
+        List<String> dummylistoffers = new ArrayList<>();
+        List<String> dummylistnotes = new ArrayList<>();
+        dummylistoffers.add("xds");
+        dummylistnotes.add("sdx");
+        user = new User(mobile,age,mf,name,dummylistoffers,dummylistnotes);
         StringRequest stringRequest = new StringRequest(Request.Method.POST, REGISTER_URL,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        Toast.makeText(OtpAuth.this, response, Toast.LENGTH_LONG).show();
+                        Toast.makeText(OtpAuth.this, "Please wait for the OTP", Toast.LENGTH_LONG).show();
                     }
                 },
                 new Response.ErrorListener() {
@@ -138,7 +146,7 @@ public class OtpAuth extends AppCompatActivity {
                             Hitchbeacon.setListners();
                             mDatabase.child("users").child(user.email).setValue(user);
                             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-                            sharedPreferences.edit().putString("email",user.email).apply();
+                            sharedPreferences.edit().putString("email",user.email).commit();
                             Hitchbeacon.loggedin=true;
                             Hitchbeacon.setLoggedin();
                             startActivity(new Intent(OtpAuth.this, IconTabsActivity.class));
