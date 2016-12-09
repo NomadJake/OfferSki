@@ -54,7 +54,7 @@ import static com.hitch.nomad.hitchbeacon.Constants.BLE.SCAN_PERIOD;
 import static com.hitch.nomad.hitchbeacon.Hitchbeacon.context;
 import static com.hitch.nomad.hitchbeacon.Hitchbeacon.user;
 @TargetApi(21)
-public class advertise extends Service implements LeScanCallback {
+public class advertise extends Service {
 
 
     private static String mBluetoothDeviceAddress = null;
@@ -75,7 +75,7 @@ public class advertise extends Service implements LeScanCallback {
     private static final int STATE_CONNECTING = 1;
     private static final int STATE_CONNECTED = 2;
     private static final int REQUEST_ENABLE_BT = 0;
-    private static final Handler mHandler = null;
+    private Handler mHandler;
     public ArrayList<BluetoothDevice> scanArrayList;
     public HashMap<String,String>uriMapping;
     public String[] hitchIds = {"74:DA:EA:B2:ED:64","74:DA:EA:B2:5B:EC","CC:08:7D:D1:4A:94"};
@@ -105,10 +105,10 @@ public class advertise extends Service implements LeScanCallback {
     private boolean alive = true;
 
 
-    public void startscanning (){
-        mHandler.post(mStartRunnable);
-        mHandler.postDelayed(mStopRunnable, 3000);
-    }
+//    public void startscanning (){
+//        mHandler.post(mStartRunnable);
+//        mHandler.postDelayed(mStopRunnable, 3000);
+//    }
 
     Handler mhandler = new Handler();
     private final IBinder mBinder = new LocalBinder();
@@ -136,18 +136,13 @@ public class advertise extends Service implements LeScanCallback {
         uriMapping = new HashMap<>();
         scannedDevices = new HashMap<String, Double>();
         alive = true;
-        uriMapping.clear();
-        uriMapping.put("74:DA:EA:B2:ED:64","http://www.kotak.com/");
-        uriMapping.put("74:DA:EA:B2:5B:EC","http://www.hdfcbank.com/");
-        uriMapping.put("74:DA:EA:B1:43:64","http://www.rblbank.com/");
-        uriMapping.put("1","Scanning...");
         super.onCreate();
         auth = FirebaseAuth.getInstance();
         settings = new ScanSettings.Builder()
                 .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
                 .build();
         filters = new ArrayList<ScanFilter>();
-
+        mHandler = new Handler();
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
     }
@@ -219,99 +214,105 @@ public class advertise extends Service implements LeScanCallback {
     }
 
 
-    final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
-
-        @Override
-        public void onConnectionStateChange(BluetoothGatt gatt, int status,
-                                            int newState) {
-            // TODO Auto-generated method stub
-            super.onConnectionStateChange(gatt, status, newState);
-
-            if (newState == BluetoothProfile.STATE_CONNECTED) {
-
-                Toast.makeText(getApplicationContext(), "foo bar", Toast.LENGTH_SHORT).show();
-
-            } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                Toast.makeText(getApplicationContext(), "foo bar disconnected", Toast.LENGTH_SHORT).show();
-
-            }
-        }
-
-        @Override
-        public void onServicesDiscovered(BluetoothGatt gatt, int status) {
-            // TODO Auto-generated method stub
-            super.onServicesDiscovered(gatt, status);
-        }
-
-        @Override
-        public void onCharacteristicRead(BluetoothGatt gatt,
-                                         BluetoothGattCharacteristic characteristic, int status) {
-            // TODO Auto-generated method stub
-            super.onCharacteristicRead(gatt, characteristic, status);
-        }
-
-        @Override
-        public void onCharacteristicWrite(BluetoothGatt gatt,
-                                          BluetoothGattCharacteristic characteristic, int status) {
-            // TODO Auto-generated method stub
-            super.onCharacteristicWrite(gatt, characteristic, status);
-        }
-
-        @Override
-        public void onCharacteristicChanged(BluetoothGatt gatt,
-                                            BluetoothGattCharacteristic characteristic) {
-            // TODO Auto-generated method stub
-            super.onCharacteristicChanged(gatt, characteristic);
-            Toast.makeText(getApplicationContext(), "char changed", Toast.LENGTH_SHORT).show();
-        }
-
-        @Override
-        public void onDescriptorRead(BluetoothGatt gatt,
-                                     BluetoothGattDescriptor descriptor, int status) {
-            // TODO Auto-generated method stub
-            super.onDescriptorRead(gatt, descriptor, status);
-        }
-
-        @Override
-        public void onDescriptorWrite(BluetoothGatt gatt,
-                                      BluetoothGattDescriptor descriptor, int status) {
-            // TODO Auto-generated method stub
-            super.onDescriptorWrite(gatt, descriptor, status);
-        }
-
-        @Override
-        public void onReliableWriteCompleted(BluetoothGatt gatt, int status) {
-            // TODO Auto-generated method stub
-            super.onReliableWriteCompleted(gatt, status);
-        }
-
-        @Override
-        public void onReadRemoteRssi(BluetoothGatt gatt, int rssi, int status) {
-            // TODO Auto-generated method stub
-            super.onReadRemoteRssi(gatt, rssi, status);
-        }
-
-
-    };
-    private Runnable mStopRunnable = new Runnable() {
-        @Override
-        public void run() {
-            stopScan();
-        }
-    };
-    private Runnable mStartRunnable = new Runnable() {
-        @Override
-        public void run() {
-            startScan();
-        }
-    };
+//    final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
+//
+//        @Override
+//        public void onConnectionStateChange(BluetoothGatt gatt, int status,
+//                                            int newState) {
+//            // TODO Auto-generated method stub
+//            super.onConnectionStateChange(gatt, status, newState);
+//
+//            if (newState == BluetoothProfile.STATE_CONNECTED) {
+//
+//                Toast.makeText(getApplicationContext(), "foo bar", Toast.LENGTH_SHORT).show();
+//
+//            } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+//                Toast.makeText(getApplicationContext(), "foo bar disconnected", Toast.LENGTH_SHORT).show();
+//
+//            }
+//        }
+//
+//        @Override
+//        public void onServicesDiscovered(BluetoothGatt gatt, int status) {
+//            // TODO Auto-generated method stub
+//            super.onServicesDiscovered(gatt, status);
+//        }
+//
+//        @Override
+//        public void onCharacteristicRead(BluetoothGatt gatt,
+//                                         BluetoothGattCharacteristic characteristic, int status) {
+//            // TODO Auto-generated method stub
+//            super.onCharacteristicRead(gatt, characteristic, status);
+//        }
+//
+//        @Override
+//        public void onCharacteristicWrite(BluetoothGatt gatt,
+//                                          BluetoothGattCharacteristic characteristic, int status) {
+//            // TODO Auto-generated method stub
+//            super.onCharacteristicWrite(gatt, characteristic, status);
+//        }
+//
+//        @Override
+//        public void onCharacteristicChanged(BluetoothGatt gatt,
+//                                            BluetoothGattCharacteristic characteristic) {
+//            // TODO Auto-generated method stub
+//            super.onCharacteristicChanged(gatt, characteristic);
+//            Toast.makeText(getApplicationContext(), "char changed", Toast.LENGTH_SHORT).show();
+//        }
+//
+//        @Override
+//        public void onDescriptorRead(BluetoothGatt gatt,
+//                                     BluetoothGattDescriptor descriptor, int status) {
+//            // TODO Auto-generated method stub
+//            super.onDescriptorRead(gatt, descriptor, status);
+//        }
+//
+//        @Override
+//        public void onDescriptorWrite(BluetoothGatt gatt,
+//                                      BluetoothGattDescriptor descriptor, int status) {
+//            // TODO Auto-generated method stub
+//            super.onDescriptorWrite(gatt, descriptor, status);
+//        }
+//
+//        @Override
+//        public void onReliableWriteCompleted(BluetoothGatt gatt, int status) {
+//            // TODO Auto-generated method stub
+//            super.onReliableWriteCompleted(gatt, status);
+//        }
+//
+//        @Override
+//        public void onReadRemoteRssi(BluetoothGatt gatt, int rssi, int status) {
+//            // TODO Auto-generated method stub
+//            super.onReadRemoteRssi(gatt, rssi, status);
+//        }
+//
+//
+//    };
+//    private Runnable mStopRunnable = new Runnable() {
+//        @Override
+//        public void run() {
+//            stopScan();
+//        }
+//    };
+//    private Runnable mStartRunnable = new Runnable() {
+//        @Override
+//        public void run() {
+//            startScan();
+//        }
+//    };
 
     private ScanCallback mScanCallback = new ScanCallback() {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
             Log.i("callbackType", String.valueOf(callbackType));
             Log.i("result", result.toString());
-            BluetoothDevice btDevice = result.getDevice();
+            BluetoothDevice device = result.getDevice();
+            if (device.getName()!=null) {
+                if(device.getName().equalsIgnoreCase("Hitch tag"))
+                {
+                    scannedDevices.put(device.getAddress(),(double)-result.getRssi());
+                }
+            }
 //            connectToDevice(btDevice);
         }
 
@@ -348,32 +349,16 @@ public class advertise extends Service implements LeScanCallback {
                 }
             };
 
-    public void startScan() {
-        mBluetoothAdapter.startLeScan(this);
-
-    }
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
-            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-        } else {
-            if (Build.VERSION.SDK_INT >= 21) {
-                mLEScanner = mBluetoothAdapter.getBluetoothLeScanner();
-                settings = new ScanSettings.Builder()
-                        .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
-                        .build();
-                filters = new ArrayList<ScanFilter>();
-            }
-            scanLeDevice(true);
-        }
-    }
-
-    public void stopScan() {
-        mBluetoothAdapter.stopLeScan(this);
-
-    }
+//    public void startScan() {
+//        mBluetoothAdapter.startLeScan(this);
+//
+//    }
+//
+//
+//    public void stopScan() {
+//        mBluetoothAdapter.stopLeScan(this);
+//
+//    }
 
     private void scanLeDevice(final boolean enable) {
         if (enable) {
@@ -402,66 +387,66 @@ public class advertise extends Service implements LeScanCallback {
         }
     }
 
-    @Override
-    public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
-        Log.d(TAG,"---------------");
-        Log.d(TAG, device.toString());
-        Log.d(TAG,String.valueOf(rssi));
-        Log.d(TAG,"++++++++++++++++");
-        if (device.getName()!=null) {
-            if(device.getName().equalsIgnoreCase("Hitch tag"))
-            {
-                scannedDevices.put(device.getAddress(),(double)-rssi);
-            }
-        }
+//    @Override
+//    public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
+//        Log.d(TAG,"---------------");
+//        Log.d(TAG, device.toString());
+//        Log.d(TAG,String.valueOf(rssi));
+//        Log.d(TAG,"++++++++++++++++");
+//        if (device.getName()!=null) {
+//            if(device.getName().equalsIgnoreCase("Hitch tag"))
+//            {
+//                scannedDevices.put(device.getAddress(),(double)-rssi);
+//            }
+//        }
+//
+//    }
+//    public boolean connect(final String address) {
+//        String TAG="connecting situation";
+//        if (mBluetoothAdapter == null || address == null) {
+//            Log.w(TAG, "BluetoothAdapter not initialized or unspecified address.");
+//            return false;
+//        }
+//
+//
+//        // Previously connected device.  Try to reconnect.
+//        if (mBluetoothDeviceAddress != null && address.equals(mBluetoothDeviceAddress)
+//                && mBluetoothGatt != null) {
+//            Log.d(TAG, "Trying to use an existing mBluetoothGatt for connection.");
+//            if (mBluetoothGatt.connect()) {
+//                mConnectionState = STATE_CONNECTING;
+//                return true;
+//            } else {
+//                return false;
+//            }
+//        }
+//
+//        final BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
+//        if (device == null) {
+//            Log.w(TAG, "Device not found.  Unable to connect.");
+//            return false;
+//        }
+//        // We want to directly connect to the device, so we are setting the autoConnect
+//        // parameter to false.
+//        mBluetoothGatt = device.connectGatt(this, false, mGattCallback);
+//        Log.d(TAG, "Trying to create a new connection.");
+//        mBluetoothDeviceAddress = address;
+//        mConnectionState = STATE_CONNECTING;
+//        return true;
+//    }
 
-    }
-    public boolean connect(final String address) {
-        String TAG="connecting situation";
-        if (mBluetoothAdapter == null || address == null) {
-            Log.w(TAG, "BluetoothAdapter not initialized or unspecified address.");
-            return false;
-        }
-
-
-        // Previously connected device.  Try to reconnect.
-        if (mBluetoothDeviceAddress != null && address.equals(mBluetoothDeviceAddress)
-                && mBluetoothGatt != null) {
-            Log.d(TAG, "Trying to use an existing mBluetoothGatt for connection.");
-            if (mBluetoothGatt.connect()) {
-                mConnectionState = STATE_CONNECTING;
-                return true;
-            } else {
-                return false;
-            }
-        }
-
-        final BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
-        if (device == null) {
-            Log.w(TAG, "Device not found.  Unable to connect.");
-            return false;
-        }
-        // We want to directly connect to the device, so we are setting the autoConnect
-        // parameter to false.
-        mBluetoothGatt = device.connectGatt(this, false, mGattCallback);
-        Log.d(TAG, "Trying to create a new connection.");
-        mBluetoothDeviceAddress = address;
-        mConnectionState = STATE_CONNECTING;
-        return true;
-    }
-
-    public int findMinIdx(int[] numbers) {
-        if (numbers == null || numbers.length == 0) return -1; // Saves time for empty array
-        int minVal = numbers[0];// Keeps a running count of the smallest value so far
-        int minIdx = 0; // Will store the index of minVal
-        for(int idx=1; idx<numbers.length; idx++) {
-            if(numbers[idx] < minVal) {
-                minVal = numbers[idx];
-                minIdx = idx;
-            }
-        }
-        return minIdx;
-    }
+//    public int findMinIdx(int[] numbers) {
+//        if (numbers == null || numbers.length == 0) return -1; // Saves time for empty array
+//        int minVal = numbers[0];// Keeps a running count of the smallest value so far
+//        int minIdx = 0; // Will store the index of minVal
+//        for(int idx=1; idx<numbers.length; idx++) {
+//            if(numbers[idx] < minVal) {
+//                minVal = numbers[idx];
+//                minIdx = idx;
+//            }
+//        }
+//        return minIdx;
+//    }
 
 
     public void foundHitch(String hitchId){
@@ -547,7 +532,8 @@ public class advertise extends Service implements LeScanCallback {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                stopScan();
+                mLEScanner.stopScan(mScanCallback);
+//                stopScan();
                 try {
                     Thread.currentThread().sleep(500);
                 } catch (InterruptedException e) {
