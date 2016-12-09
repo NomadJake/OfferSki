@@ -1,13 +1,20 @@
 package com.hitch.nomad.hitchbeacon;
 
+import android.*;
+import android.Manifest;
+import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
+import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
@@ -31,7 +38,7 @@ import java.util.List;
 
 import static com.hitch.nomad.hitchbeacon.Constants.BLE.REQUEST_ENABLE_BT;
 import static com.hitch.nomad.hitchbeacon.Hitchbeacon.context;
-
+@TargetApi(23)
 public class IconTabsActivity extends AppCompatActivity {
 
     private Toolbar toolbar;
@@ -40,6 +47,7 @@ public class IconTabsActivity extends AppCompatActivity {
     private PendingIntent pendingIntent,pendingIntentToStop;
     long backPressedTime = 0;
     private BluetoothAdapter mBluetoothAdapter;
+    private static final int PERMISSION_REQUEST_COARSE_LOCATION = 1;
 
 
 
@@ -66,6 +74,22 @@ public class IconTabsActivity extends AppCompatActivity {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         }
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { 
+//            // Android M Permission check 
+//            if (this.checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) { 
+//                final AlertDialog.Builder builder = new AlertDialog.Builder(this); 
+//                builder.setTitle("This app needs location access");
+//                builder.setMessage("Please grant location access so this app can detect beacons.");
+//                builder.setPositiveButton(android.R.string.ok, null); 
+//                builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+//                    @Override
+//                    public void onDismiss(DialogInterface dialog) {
+//                        requestPermissions(new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSION_REQUEST_COARSE_LOCATION); 
+//                    }
+//                });
+//                builder.show(); 
+//            }
+//             }
         if(!isMyServiceRunning(advertise.class)){
             final Handler handler = new Handler();
             handler.postDelayed(new Runnable() {
@@ -75,12 +99,66 @@ public class IconTabsActivity extends AppCompatActivity {
                     startService(serviceIntent);
                     start2();
                 }
-            }, 5000);
+            }, 10000);
+
+        }
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
+                new IntentFilter("offers"));
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+            if(this.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+                final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("Location needed");
+                builder.setPositiveButton(android.R.string.ok,null);
+                builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    @Override
+                    public void onDismiss(DialogInterface dialog) {
+                        requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSION_REQUEST_COARSE_LOCATION);
+                    }
+                });
+                builder.show();
+            }
+        }
+        if(!isMyServiceRunning(advertise.class)){
+            final Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+
+                    startService(serviceIntent);
+                    start2();
+                }
+            }, 10000);
 
         }
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
                 new IntentFilter("offers"));
 
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_REQUEST_COARSE_LOCATION: {
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.d("Permissions", "coarse location permission granted");
+                } else {
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setTitle("Functionality limited");
+                    builder.setMessage("Since location access has not been granted, this app will not be able to discover beacons when in the background.");
+                    builder.setPositiveButton(android.R.string.ok, null);
+                    builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+
+                        @Override
+                        public void onDismiss(DialogInterface dialog) {
+                        }
+
+                    });
+                    builder.show();
+                }
+                return;
+            }
+        }
     }
 
     private void setupTabIcons() {

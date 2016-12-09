@@ -69,7 +69,6 @@ public class advertise extends Service {
     private List<ScanFilter> filters;
 
 
-
     private static int mConnectionState;
     private static final int STATE_DISCONNECTED = 0;
     private static final int STATE_CONNECTING = 1;
@@ -103,12 +102,6 @@ public class advertise extends Service {
     }
 
     private boolean alive = true;
-
-
-//    public void startscanning (){
-//        mHandler.post(mStartRunnable);
-//        mHandler.postDelayed(mStopRunnable, 3000);
-//    }
 
     Handler mhandler = new Handler();
     private final IBinder mBinder = new LocalBinder();
@@ -214,93 +207,6 @@ public class advertise extends Service {
     }
 
 
-//    final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
-//
-//        @Override
-//        public void onConnectionStateChange(BluetoothGatt gatt, int status,
-//                                            int newState) {
-//            // TODO Auto-generated method stub
-//            super.onConnectionStateChange(gatt, status, newState);
-//
-//            if (newState == BluetoothProfile.STATE_CONNECTED) {
-//
-//                Toast.makeText(getApplicationContext(), "foo bar", Toast.LENGTH_SHORT).show();
-//
-//            } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-//                Toast.makeText(getApplicationContext(), "foo bar disconnected", Toast.LENGTH_SHORT).show();
-//
-//            }
-//        }
-//
-//        @Override
-//        public void onServicesDiscovered(BluetoothGatt gatt, int status) {
-//            // TODO Auto-generated method stub
-//            super.onServicesDiscovered(gatt, status);
-//        }
-//
-//        @Override
-//        public void onCharacteristicRead(BluetoothGatt gatt,
-//                                         BluetoothGattCharacteristic characteristic, int status) {
-//            // TODO Auto-generated method stub
-//            super.onCharacteristicRead(gatt, characteristic, status);
-//        }
-//
-//        @Override
-//        public void onCharacteristicWrite(BluetoothGatt gatt,
-//                                          BluetoothGattCharacteristic characteristic, int status) {
-//            // TODO Auto-generated method stub
-//            super.onCharacteristicWrite(gatt, characteristic, status);
-//        }
-//
-//        @Override
-//        public void onCharacteristicChanged(BluetoothGatt gatt,
-//                                            BluetoothGattCharacteristic characteristic) {
-//            // TODO Auto-generated method stub
-//            super.onCharacteristicChanged(gatt, characteristic);
-//            Toast.makeText(getApplicationContext(), "char changed", Toast.LENGTH_SHORT).show();
-//        }
-//
-//        @Override
-//        public void onDescriptorRead(BluetoothGatt gatt,
-//                                     BluetoothGattDescriptor descriptor, int status) {
-//            // TODO Auto-generated method stub
-//            super.onDescriptorRead(gatt, descriptor, status);
-//        }
-//
-//        @Override
-//        public void onDescriptorWrite(BluetoothGatt gatt,
-//                                      BluetoothGattDescriptor descriptor, int status) {
-//            // TODO Auto-generated method stub
-//            super.onDescriptorWrite(gatt, descriptor, status);
-//        }
-//
-//        @Override
-//        public void onReliableWriteCompleted(BluetoothGatt gatt, int status) {
-//            // TODO Auto-generated method stub
-//            super.onReliableWriteCompleted(gatt, status);
-//        }
-//
-//        @Override
-//        public void onReadRemoteRssi(BluetoothGatt gatt, int rssi, int status) {
-//            // TODO Auto-generated method stub
-//            super.onReadRemoteRssi(gatt, rssi, status);
-//        }
-//
-//
-//    };
-//    private Runnable mStopRunnable = new Runnable() {
-//        @Override
-//        public void run() {
-//            stopScan();
-//        }
-//    };
-//    private Runnable mStartRunnable = new Runnable() {
-//        @Override
-//        public void run() {
-//            startScan();
-//        }
-//    };
-
     private ScanCallback mScanCallback = new ScanCallback() {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
@@ -339,26 +245,9 @@ public class advertise extends Service {
                             scannedDevices.put(device.getAddress(),(double)-rssi);
                         }
                     }
-//                    runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            Log.i("onLeScan", device.toString());
-//                            connectToDevice(device);
-//                        }
-//                    });
                 }
             };
 
-//    public void startScan() {
-//        mBluetoothAdapter.startLeScan(this);
-//
-//    }
-//
-//
-//    public void stopScan() {
-//        mBluetoothAdapter.stopLeScan(this);
-//
-//    }
 
     private void scanLeDevice(final boolean enable) {
         if (enable) {
@@ -387,66 +276,6 @@ public class advertise extends Service {
         }
     }
 
-//    @Override
-//    public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
-//        Log.d(TAG,"---------------");
-//        Log.d(TAG, device.toString());
-//        Log.d(TAG,String.valueOf(rssi));
-//        Log.d(TAG,"++++++++++++++++");
-//        if (device.getName()!=null) {
-//            if(device.getName().equalsIgnoreCase("Hitch tag"))
-//            {
-//                scannedDevices.put(device.getAddress(),(double)-rssi);
-//            }
-//        }
-//
-//    }
-//    public boolean connect(final String address) {
-//        String TAG="connecting situation";
-//        if (mBluetoothAdapter == null || address == null) {
-//            Log.w(TAG, "BluetoothAdapter not initialized or unspecified address.");
-//            return false;
-//        }
-//
-//
-//        // Previously connected device.  Try to reconnect.
-//        if (mBluetoothDeviceAddress != null && address.equals(mBluetoothDeviceAddress)
-//                && mBluetoothGatt != null) {
-//            Log.d(TAG, "Trying to use an existing mBluetoothGatt for connection.");
-//            if (mBluetoothGatt.connect()) {
-//                mConnectionState = STATE_CONNECTING;
-//                return true;
-//            } else {
-//                return false;
-//            }
-//        }
-//
-//        final BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
-//        if (device == null) {
-//            Log.w(TAG, "Device not found.  Unable to connect.");
-//            return false;
-//        }
-//        // We want to directly connect to the device, so we are setting the autoConnect
-//        // parameter to false.
-//        mBluetoothGatt = device.connectGatt(this, false, mGattCallback);
-//        Log.d(TAG, "Trying to create a new connection.");
-//        mBluetoothDeviceAddress = address;
-//        mConnectionState = STATE_CONNECTING;
-//        return true;
-//    }
-
-//    public int findMinIdx(int[] numbers) {
-//        if (numbers == null || numbers.length == 0) return -1; // Saves time for empty array
-//        int minVal = numbers[0];// Keeps a running count of the smallest value so far
-//        int minIdx = 0; // Will store the index of minVal
-//        for(int idx=1; idx<numbers.length; idx++) {
-//            if(numbers[idx] < minVal) {
-//                minVal = numbers[idx];
-//                minIdx = idx;
-//            }
-//        }
-//        return minIdx;
-//    }
 
 
     public void foundHitch(String hitchId){
