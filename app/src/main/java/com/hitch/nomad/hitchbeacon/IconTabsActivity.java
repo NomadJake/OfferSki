@@ -3,6 +3,7 @@ package com.hitch.nomad.hitchbeacon;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -28,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import static com.hitch.nomad.hitchbeacon.Constants.BLE.REQUEST_ENABLE_BT;
 import static com.hitch.nomad.hitchbeacon.Hitchbeacon.context;
 
 public class IconTabsActivity extends AppCompatActivity {
@@ -37,16 +39,14 @@ public class IconTabsActivity extends AppCompatActivity {
     private ViewPager viewPager;
     private PendingIntent pendingIntent,pendingIntentToStop;
     long backPressedTime = 0;
+    private BluetoothAdapter mBluetoothAdapter;
+
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_icon_tabs);
-
-//        toolbar = (Toolbar) findViewById(R.id.toolbar);
-//        setSupportActionBar(toolbar);
-//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         viewPager = (ViewPager) findViewById(R.id.viewpager);
         setupViewPager(viewPager);
@@ -62,12 +62,17 @@ public class IconTabsActivity extends AppCompatActivity {
         pendingIntentToStop = PendingIntent.getBroadcast(IconTabsActivity.this,0,stopAlarmIntent,0);
         Intent fcmrefresh = new Intent(this, MyFirebaseInstanceIDService.class);
         startService(fcmrefresh);
+        if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+        }
         if(!isMyServiceRunning(advertise.class)){
             final Handler handler = new Handler();
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-//                    startService(serviceIntent);
+
+                    startService(serviceIntent);
                     start2();
                 }
             }, 5000);
@@ -202,7 +207,7 @@ public class IconTabsActivity extends AppCompatActivity {
         manager.setRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime(),
                 2*60*60,pendingIntent);
 //        manager.set(AlarmManager.ELAPSED_REALTIME,AlarmManager.INTERVAL_HOUR,pendingIntentToStop);
-        Toast.makeText(this, "Alarm Set", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Initiating Tracking", Toast.LENGTH_SHORT).show();
     }
     public void startAt10() {
         AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);

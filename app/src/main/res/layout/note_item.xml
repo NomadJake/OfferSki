@@ -22,6 +22,12 @@
             android:layout_height="wrap_content"
             tools:text="Title" />
 
+        <com.hitch.nomad.hitchbeacon.FeedImageView
+            android:id="@+id/imageViewfav"
+            android:layout_gravity="center"
+            android:layout_width="80dp"
+            android:layout_height="80dp" />
+
         <TextView
             android:id="@+id/note_item_desc"
             style="@style/TextAppearance.AppCompat.Body1"

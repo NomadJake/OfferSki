@@ -7,11 +7,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.android.volley.toolbox.ImageLoader;
+
 import java.util.List;
 
 public class CouponAdapter extends RecyclerView.Adapter<CouponAdapter.OfferVH> {
     Context context;
     List<Note> notes;
+    private ImageLoader imageLoader2;
 
     OnItemClickListener clickListener;
 
@@ -26,6 +29,7 @@ public class CouponAdapter extends RecyclerView.Adapter<CouponAdapter.OfferVH> {
     public OfferVH onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.note_item, parent, false);
         OfferVH viewHolder = new OfferVH(view);
+        imageLoader2 = Hitchbeacon.getInstance().getImageLoader();
         return viewHolder;
     }
 
@@ -34,7 +38,7 @@ public class CouponAdapter extends RecyclerView.Adapter<CouponAdapter.OfferVH> {
 
         holder.title.setText(notes.get(position).getTitle());
         holder.note.setText(notes.get(position).getNote());
-
+        holder.offerImage.setImageUrl(notes.get(position).getShopURI(),imageLoader2);
     }
 
     @Override
@@ -44,12 +48,14 @@ public class CouponAdapter extends RecyclerView.Adapter<CouponAdapter.OfferVH> {
 
     class OfferVH extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView title, note;
+        private FeedImageView offerImage;
 
         public OfferVH(View itemView) {
             super(itemView);
 
             title = (TextView) itemView.findViewById(R.id.note_item_title);
             note = (TextView) itemView.findViewById(R.id.note_item_desc);
+            offerImage = (FeedImageView) itemView.findViewById(R.id.imageViewfav);
 
             itemView.setOnClickListener(this);
         }

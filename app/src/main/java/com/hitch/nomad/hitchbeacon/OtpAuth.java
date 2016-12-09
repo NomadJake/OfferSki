@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.hitch.nomad.hitchbeacon.Hitchbeacon.context;
+import static com.hitch.nomad.hitchbeacon.Hitchbeacon.setLoggedin;
 
 public class OtpAuth extends AppCompatActivity {
 
@@ -147,6 +148,7 @@ public class OtpAuth extends AppCompatActivity {
                             mDatabase.child("users").child(user.email).setValue(user);
                             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
                             sharedPreferences.edit().putString("email",user.email).commit();
+                            setLoggedin();
                             Hitchbeacon.loggedin=true;
                             Hitchbeacon.setLoggedin();
                             startActivity(new Intent(OtpAuth.this, IconTabsActivity.class));

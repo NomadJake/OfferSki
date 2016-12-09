@@ -15,8 +15,8 @@ public class DetailedActivity extends AppCompatActivity {
     public ImageView imView;
     public String titleString,offerString,codeString;
     private ImageLoader imageLoader;
-    private FeedImageView offerImage;
-    public String offerURL;
+    private FeedImageView offerImage,logofiv;
+    public String offerURL,logoURL;
 
 
     @Override
@@ -28,9 +28,11 @@ public class DetailedActivity extends AppCompatActivity {
         code = (TextView)findViewById(R.id.textViewCode);
         title = (TextView)findViewById(R.id.tvOffer);
         offer = (TextView)findViewById(R.id.textView2);
+        logofiv = (FeedImageView)findViewById(R.id.feedImageView);
         imView = (ImageView)findViewById(R.id.imageView);
         titleString = getIntent().getStringExtra("title");
         offerURL = getIntent().getStringExtra("URL");
+        logoURL = getIntent().getStringExtra("logoURL");
         try {
             codeString = getIntent().getStringExtra("code");
         } catch (Exception e) {
@@ -39,11 +41,13 @@ public class DetailedActivity extends AppCompatActivity {
         offerString = getIntent().getStringExtra("note");
         try {
             offerImage.setImageUrl(offerURL,imageLoader);
+            logofiv.setImageUrl(logoURL,imageLoader);
         } catch (Exception e) {
             e.printStackTrace();
         }
         title.setText(titleString);
         offer.setText(offerString);
+        code.setText(codeString);
 
     }
 }

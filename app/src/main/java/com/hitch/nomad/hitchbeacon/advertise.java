@@ -10,6 +10,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -23,6 +24,11 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
+import android.bluetooth.le.BluetoothLeScanner;
+import android.bluetooth.le.ScanCallback;
+import android.bluetooth.le.ScanFilter;
+import android.bluetooth.le.ScanResult;
+import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -31,6 +37,7 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -43,8 +50,10 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import static com.hitch.nomad.hitchbeacon.Constants.BLE.SCAN_PERIOD;
+import static com.hitch.nomad.hitchbeacon.Hitchbeacon.context;
 import static com.hitch.nomad.hitchbeacon.Hitchbeacon.user;
-
+@TargetApi(21)
 public class advertise extends Service implements LeScanCallback {
 
 
@@ -55,6 +64,11 @@ public class advertise extends Service implements LeScanCallback {
     private BluetoothManager mBluetoothManager;
     private BluetoothAdapter mBluetoothAdapter;
     private BluetoothGatt mBluetoothGatt;
+    private BluetoothLeScanner bluetoothLeScanner;
+    private BluetoothLeScanner mLEScanner;
+    private List<ScanFilter> filters;
+
+
 
     private static int mConnectionState;
     private static final int STATE_DISCONNECTED = 0;
@@ -68,7 +82,7 @@ public class advertise extends Service implements LeScanCallback {
     public int [] rssiValues = {100,100,100};
     public String[] urls = {};
     Map<String,Double>scannedDevices;
-
+    private ScanSettings settings;
     public String TAG = "advertise";
     public TrackThread scanThread;
     public SayHello couponThread;
@@ -117,6 +131,7 @@ public class advertise extends Service implements LeScanCallback {
     public void onCreate() {
         mBluetoothManager=(BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         mBluetoothAdapter= mBluetoothManager.getAdapter();
+        bluetoothLeScanner = mBluetoothAdapter.getBluetoothLeScanner();
         Log.d(TAG,"Started service , advertising");
         uriMapping = new HashMap<>();
         scannedDevices = new HashMap<String, Double>();
@@ -128,6 +143,11 @@ public class advertise extends Service implements LeScanCallback {
         uriMapping.put("1","Scanning...");
         super.onCreate();
         auth = FirebaseAuth.getInstance();
+        settings = new ScanSettings.Builder()
+                .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+                .build();
+        filters = new ArrayList<ScanFilter>();
+
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
     }
@@ -163,6 +183,18 @@ public class advertise extends Service implements LeScanCallback {
         }else {
             if (scanThread == null || !scanThread.isAlive()) {
                 mBluetoothAdapter.enable();
+                if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
+                    Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+//                    context.startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+                } else {
+                    if (Build.VERSION.SDK_INT >= 21) {
+                        mLEScanner = mBluetoothAdapter.getBluetoothLeScanner();
+                        settings = new ScanSettings.Builder()
+                                .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+                                .build();
+                        filters = new ArrayList<ScanFilter>();
+                    }
+                }
                 scanThread = new TrackThread();
                 couponThread = new SayHello();
                 couponThread.start();
@@ -274,14 +306,100 @@ public class advertise extends Service implements LeScanCallback {
         }
     };
 
+    private ScanCallback mScanCallback = new ScanCallback() {
+        @Override
+        public void onScanResult(int callbackType, ScanResult result) {
+            Log.i("callbackType", String.valueOf(callbackType));
+            Log.i("result", result.toString());
+            BluetoothDevice btDevice = result.getDevice();
+//            connectToDevice(btDevice);
+        }
+
+        @Override
+        public void onBatchScanResults(List<ScanResult> results) {
+            for (ScanResult sr : results) {
+                Log.i("ScanResult - Results", sr.toString());
+            }
+        }
+
+        @Override
+        public void onScanFailed(int errorCode) {
+            Log.e("Scan Failed", "Error Code: " + errorCode);
+        }
+    };
+    private BluetoothAdapter.LeScanCallback mLeScanCallback =
+            new BluetoothAdapter.LeScanCallback() {
+                @Override
+                public void onLeScan(final BluetoothDevice device, int rssi,
+                                     byte[] scanRecord) {
+                    if (device.getName()!=null) {
+                        if(device.getName().equalsIgnoreCase("Hitch tag"))
+                        {
+                            scannedDevices.put(device.getAddress(),(double)-rssi);
+                        }
+                    }
+//                    runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            Log.i("onLeScan", device.toString());
+//                            connectToDevice(device);
+//                        }
+//                    });
+                }
+            };
+
     public void startScan() {
         mBluetoothAdapter.startLeScan(this);
 
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+        } else {
+            if (Build.VERSION.SDK_INT >= 21) {
+                mLEScanner = mBluetoothAdapter.getBluetoothLeScanner();
+                settings = new ScanSettings.Builder()
+                        .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+                        .build();
+                filters = new ArrayList<ScanFilter>();
+            }
+            scanLeDevice(true);
+        }
     }
 
     public void stopScan() {
         mBluetoothAdapter.stopLeScan(this);
 
+    }
+
+    private void scanLeDevice(final boolean enable) {
+        if (enable) {
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if (Build.VERSION.SDK_INT < 21) {
+                        mBluetoothAdapter.stopLeScan(mLeScanCallback);
+                    } else {
+                        mLEScanner.stopScan(mScanCallback);
+
+                    }
+                }
+            }, SCAN_PERIOD);
+            if (Build.VERSION.SDK_INT < 21) {
+                mBluetoothAdapter.startLeScan(mLeScanCallback);
+            } else {
+                mLEScanner.startScan(filters, settings, mScanCallback);
+            }
+        } else {
+            if (Build.VERSION.SDK_INT < 21) {
+                mBluetoothAdapter.stopLeScan(mLeScanCallback);
+            } else {
+                mLEScanner.stopScan(mScanCallback);
+            }
+        }
     }
 
     @Override
@@ -293,9 +411,6 @@ public class advertise extends Service implements LeScanCallback {
         if (device.getName()!=null) {
             if(device.getName().equalsIgnoreCase("Hitch tag"))
             {
-//                hitchIds[i] = device.getAddress();
-//                rssiValues[i] = -rssi;
-//                i += 1;
                 scannedDevices.put(device.getAddress(),(double)-rssi);
             }
         }
@@ -374,28 +489,6 @@ public class advertise extends Service implements LeScanCallback {
             }
         }
 
-//        Iterator it = Hitchbeacon.offerLinkedHashMap.entrySet().iterator();
-//        while (it.hasNext()) {
-//            Map.Entry pair = (Map.Entry)it.next();
-////            System.out.println(pair.getKey() + " = " + pair.getValue());
-//            Offer offer = (Offer) pair.getValue();
-//            String hid = offer.getHitchId();
-//            Log.d(hid,"hid");
-//            if(hid.equals(hitchId) && (offer.getDiscovered().equals(false))){
-//                Log.d("offerfound","hitch found ... notifying user");
-//                notifyUser(offer.title,offer.getOffer(),offer.getLogoURI());
-//                try {
-//                    offer.setDiscovered(true);
-//                    Hitchbeacon.offerLinkedHashMap.put((String) pair.getKey(),offer);
-//                    Log.d("push","push");
-//                    mDatabase.child("offers").child((String) pair.getKey()).child("discovered").setValue(true);
-////                    LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent("offers"));
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//            it.remove(); // avoids a ConcurrentModificationException
-//        }
     }
 
     public void notifyUser(String title,String description,String image){
@@ -447,7 +540,8 @@ public class advertise extends Service implements LeScanCallback {
             }
             while (alive) {
                 Log.d(TAG,"Tracking thread running...");
-                startScan();
+                scanLeDevice(true);
+//                startScan();
                 try {
                     Thread.currentThread().sleep(4000);
                 } catch (InterruptedException e) {
@@ -477,23 +571,23 @@ public class advertise extends Service implements LeScanCallback {
     class SayHello extends Thread {
         public void run() {
             super.run();
-            while (true&&Hitchbeacon.user!=null) {
+            while (Hitchbeacon.user!=null) {
                 Log.d("SayHello", "said hello");
-                Boolean notified = false;
                 coupons = new ArrayList<>(Hitchbeacon.noteLinkedHashMap.values());
-                Random rn = new Random();
-                int range = coupons.size();
+                Random r = new Random();
+                int Low = 0;
+                int High = coupons.size();
                 Note testNote = null;
                 try {
-                    int randomNum =  rn.nextInt(range);
-                    testNote = coupons.get(randomNum);
+                    int Result = r.nextInt(High-Low) + Low;
+                    Log.d("Random: ",Integer.toString(Result));
+                    testNote = coupons.get(Result);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
                 if (testNote!=null) {
                     if (!user.discoveredNotes.contains(testNote.getNote())) {
                         notifyUser(testNote.title, testNote.note, testNote.logoURI);
-                        notified = true;
     //                    testNote.discovered = true;
                         user.discoveredNotes.add(testNote.getNote());
                         mDatabase.child("users").child(user.email).setValue(user);

@@ -7,11 +7,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.android.volley.toolbox.ImageLoader;
+
 import java.util.List;
 
 public class OffersAdapter extends RecyclerView.Adapter<OffersAdapter.OfferVH> {
     Context context;
     List<Offer> notes;
+    private ImageLoader imageLoader;
 
     OnItemClickListener clickListener;
 
@@ -23,6 +26,7 @@ public class OffersAdapter extends RecyclerView.Adapter<OffersAdapter.OfferVH> {
     public OfferVH onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.note_item, parent, false);
         OfferVH viewHolder = new OfferVH(view);
+        imageLoader = Hitchbeacon.getInstance().getImageLoader();
         return viewHolder;
     }
 
@@ -31,6 +35,7 @@ public class OffersAdapter extends RecyclerView.Adapter<OffersAdapter.OfferVH> {
 
         holder.title.setText(notes.get(position).getTitle());
         holder.note.setText(notes.get(position).getOffer());
+        holder.offerImage.setImageUrl(notes.get(position).getLogoURI(),imageLoader);
 
     }
 
@@ -41,13 +46,14 @@ public class OffersAdapter extends RecyclerView.Adapter<OffersAdapter.OfferVH> {
 
     class OfferVH extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView title, note;
+        private FeedImageView offerImage;
 
         public OfferVH(View itemView) {
             super(itemView);
 
             title = (TextView) itemView.findViewById(R.id.note_item_title);
             note = (TextView) itemView.findViewById(R.id.note_item_desc);
-
+            offerImage = (FeedImageView) itemView.findViewById(R.id.imageViewfav);
             itemView.setOnClickListener(this);
         }
 

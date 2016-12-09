@@ -113,11 +113,11 @@ public class ThreeFragment extends Fragment {
                     Log.d(TAG, "click");
                     Intent i = new Intent(getContext(), DetailedActivity.class);
                     i.putExtra("isEditing", true);
-                    i.putExtra("title", coupons.get(position).title);
-                    i.putExtra("note", coupons.get(position).note);
-                    i.putExtra("URL", coupons.get(position).getShopURI());
-                    i.putExtra("code",coupons.get(position).getCode());
-
+                    i.putExtra("title", couponsToShow.get(position).title);
+                    i.putExtra("note", couponsToShow.get(position).note);
+                    i.putExtra("URL", couponsToShow.get(position).getShopURI());
+                    i.putExtra("code",couponsToShow.get(position).getCode());
+                    i.putExtra("logoURL",couponsToShow.get(position).getLogoURI());
                     modifyPos = position;
 
                     startActivity(i);

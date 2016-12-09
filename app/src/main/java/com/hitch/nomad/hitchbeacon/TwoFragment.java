@@ -132,6 +132,7 @@ public class TwoFragment extends Fragment {
                     i.putExtra("note", offers.get(position).Offer);
                     i.putExtra("URL", offers.get(position).getUid());
                     i.putExtra("code"," ");
+                    i.putExtra("logoURL",offers.get(position).getLogoURI());
 
                     modifyPos = position;
 
@@ -213,21 +214,13 @@ public class TwoFragment extends Fragment {
     };
 
     public void updateOffers(){
-        offers = new ArrayList<>(Hitchbeacon.offerLinkedHashMap.values());
-//        try {
-//            List<Offer> allOffers = new ArrayList<>();
-//            allOffers = new ArrayList<>(Hitchbeacon.offerLinkedHashMap.values());
-//            if(allOffers.size() != 0){
-//                offers.clear();
-//            }
-//            for(Offer offer : allOffers){
-//                if(Hitchbeacon.user.discoveredOffers.contains(offer)){
-//                    offers.add(offer);
-//                }
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
+        List<Offer> allOffers;
+        allOffers = new ArrayList<>(Hitchbeacon.offerLinkedHashMap.values());
+        offers.clear();
+        for (Offer offer:allOffers){
+            offers.add(offer);
+        }
+        Log.d("offers","updateOffers called actually.");
         adapter.notifyDataSetChanged();
     }
 
