@@ -53,7 +53,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import static com.hitch.nomad.hitchbeacon.Constants.BLE.SCAN_PERIOD;
 import static com.hitch.nomad.hitchbeacon.Hitchbeacon.context;
 import static com.hitch.nomad.hitchbeacon.Hitchbeacon.user;
-@TargetApi(21)
+//@TargetApi(21)
 public class advertise extends Service implements LeScanCallback {
 
 
@@ -131,7 +131,7 @@ public class advertise extends Service implements LeScanCallback {
     public void onCreate() {
         mBluetoothManager=(BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         mBluetoothAdapter= mBluetoothManager.getAdapter();
-        bluetoothLeScanner = mBluetoothAdapter.getBluetoothLeScanner();
+//        bluetoothLeScanner = mBluetoothAdapter.getBluetoothLeScanner();
         Log.d(TAG,"Started service , advertising");
         uriMapping = new HashMap<>();
         scannedDevices = new HashMap<String, Double>();
@@ -143,10 +143,10 @@ public class advertise extends Service implements LeScanCallback {
         uriMapping.put("1","Scanning...");
         super.onCreate();
         auth = FirebaseAuth.getInstance();
-        settings = new ScanSettings.Builder()
-                .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
-                .build();
-        filters = new ArrayList<ScanFilter>();
+//        settings = new ScanSettings.Builder()
+//                .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+//                .build();
+//        filters = new ArrayList<ScanFilter>();
 
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
@@ -306,27 +306,27 @@ public class advertise extends Service implements LeScanCallback {
         }
     };
 
-    private ScanCallback mScanCallback = new ScanCallback() {
-        @Override
-        public void onScanResult(int callbackType, ScanResult result) {
-            Log.i("callbackType", String.valueOf(callbackType));
-            Log.i("result", result.toString());
-            BluetoothDevice btDevice = result.getDevice();
-//            connectToDevice(btDevice);
-        }
-
-        @Override
-        public void onBatchScanResults(List<ScanResult> results) {
-            for (ScanResult sr : results) {
-                Log.i("ScanResult - Results", sr.toString());
-            }
-        }
-
-        @Override
-        public void onScanFailed(int errorCode) {
-            Log.e("Scan Failed", "Error Code: " + errorCode);
-        }
-    };
+//    private ScanCallback mScanCallback = new ScanCallback() {
+//        @Override
+//        public void onScanResult(int callbackType, ScanResult result) {
+//            Log.i("callbackType", String.valueOf(callbackType));
+//            Log.i("result", result.toString());
+//            BluetoothDevice btDevice = result.getDevice();
+////            connectToDevice(btDevice);
+//        }
+//
+//        @Override
+//        public void onBatchScanResults(List<ScanResult> results) {
+//            for (ScanResult sr : results) {
+//                Log.i("ScanResult - Results", sr.toString());
+//            }
+//        }
+//
+//        @Override
+//        public void onScanFailed(int errorCode) {
+//            Log.e("Scan Failed", "Error Code: " + errorCode);
+//        }
+//    };
     private BluetoothAdapter.LeScanCallback mLeScanCallback =
             new BluetoothAdapter.LeScanCallback() {
                 @Override
@@ -352,55 +352,38 @@ public class advertise extends Service implements LeScanCallback {
         mBluetoothAdapter.startLeScan(this);
 
     }
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
-            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-        } else {
-            if (Build.VERSION.SDK_INT >= 21) {
-                mLEScanner = mBluetoothAdapter.getBluetoothLeScanner();
-                settings = new ScanSettings.Builder()
-                        .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
-                        .build();
-                filters = new ArrayList<ScanFilter>();
-            }
-            scanLeDevice(true);
-        }
-    }
 
     public void stopScan() {
         mBluetoothAdapter.stopLeScan(this);
 
     }
 
-    private void scanLeDevice(final boolean enable) {
-        if (enable) {
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    if (Build.VERSION.SDK_INT < 21) {
-                        mBluetoothAdapter.stopLeScan(mLeScanCallback);
-                    } else {
-                        mLEScanner.stopScan(mScanCallback);
-
-                    }
-                }
-            }, SCAN_PERIOD);
-            if (Build.VERSION.SDK_INT < 21) {
-                mBluetoothAdapter.startLeScan(mLeScanCallback);
-            } else {
-                mLEScanner.startScan(filters, settings, mScanCallback);
-            }
-        } else {
-            if (Build.VERSION.SDK_INT < 21) {
-                mBluetoothAdapter.stopLeScan(mLeScanCallback);
-            } else {
-                mLEScanner.stopScan(mScanCallback);
-            }
-        }
-    }
+//    private void scanLeDevice(final boolean enable) {
+//        if (enable) {
+//            mHandler.postDelayed(new Runnable() {
+//                @Override
+//                public void run() {
+//                    if (Build.VERSION.SDK_INT < 21) {
+//                        mBluetoothAdapter.stopLeScan(mLeScanCallback);
+//                    } else {
+//                        mLEScanner.stopScan(mScanCallback);
+//
+//                    }
+//                }
+//            }, SCAN_PERIOD);
+//            if (Build.VERSION.SDK_INT < 21) {
+//                mBluetoothAdapter.startLeScan(mLeScanCallback);
+//            } else {
+//                mLEScanner.startScan(filters, settings, mScanCallback);
+//            }
+//        } else {
+//            if (Build.VERSION.SDK_INT < 21) {
+//                mBluetoothAdapter.stopLeScan(mLeScanCallback);
+//            } else {
+//                mLEScanner.stopScan(mScanCallback);
+//            }
+//        }
+//    }
 
     @Override
     public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
@@ -540,8 +523,8 @@ public class advertise extends Service implements LeScanCallback {
             }
             while (alive) {
                 Log.d(TAG,"Tracking thread running...");
-                scanLeDevice(true);
-//                startScan();
+//                scanLeDevice(true);
+                startScan();
                 try {
                     Thread.currentThread().sleep(4000);
                 } catch (InterruptedException e) {
