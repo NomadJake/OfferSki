@@ -22,7 +22,7 @@ public class DetailedActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_detailed);
+        setContentView(R.layout.detailed_with_logo);
         imageLoader = Hitchbeacon.getInstance().getImageLoader();
         offerImage = (FeedImageView)findViewById(R.id.imageView);
         code = (TextView)findViewById(R.id.textViewCode);
@@ -45,8 +45,8 @@ public class DetailedActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        title.setText(titleString);
-        offer.setText(offerString);
+        title.setText(offerString);
+//        offer.setText(offerString);
         code.setText(codeString);
 
     }

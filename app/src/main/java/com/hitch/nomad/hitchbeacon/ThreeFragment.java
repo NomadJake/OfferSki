@@ -73,7 +73,7 @@ public class ThreeFragment extends Fragment {
         recyclerView = (RecyclerView) view.findViewById(R.id.list_coupons);
 
         StaggeredGridLayoutManager gridLayoutManager =
-                new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
+                new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL);
         gridLayoutManager.setGapStrategy(StaggeredGridLayoutManager.GAP_HANDLING_MOVE_ITEMS_BETWEEN_SPANS);
 
         recyclerView.setLayoutManager(gridLayoutManager);
@@ -126,26 +126,26 @@ public class ThreeFragment extends Fragment {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        mySwipeRefreshLayout.setOnRefreshListener(
-                new SwipeRefreshLayout.OnRefreshListener() {
-                    @Override
-                    public void onRefresh() {
-                        Log.i(TAG, "onRefresh called from SwipeRefreshLayout");
-
-                        // This method performs the actual data-refresh operation.
-                        // The method calls setRefreshing(false) when it's finished.
-                        List<Note> allOffers = new ArrayList<>();
-                        allOffers = new ArrayList<>(Hitchbeacon.noteLinkedHashMap.values());
-                        if(allOffers.size() != 0){
-                            coupons.clear();
-                        }
-                        for(Note offer : allOffers){
-                                coupons.add(offer);
-
-                        }
-                    }
-                }
-        );
+//        mySwipeRefreshLayout.setOnRefreshListener(
+//                new SwipeRefreshLayout.OnRefreshListener() {
+//                    @Override
+//                    public void onRefresh() {
+//                        Log.i(TAG, "onRefresh called from SwipeRefreshLayout");
+//
+//                        // This method performs the actual data-refresh operation.
+//                        // The method calls setRefreshing(false) when it's finished.
+//                        List<Note> allOffers = new ArrayList<>();
+//                        allOffers = new ArrayList<>(Hitchbeacon.noteLinkedHashMap.values());
+//                        if(allOffers.size() != 0){
+//                            coupons.clear();
+//                        }
+//                        for(Note offer : allOffers){
+//                                coupons.add(offer);
+//
+//                        }
+//                    }
+//                }
+//        );
         LocalBroadcastManager.getInstance(getContext()).registerReceiver(mMessageReceiver,
                 new IntentFilter("notes"));
         return view;

@@ -62,7 +62,7 @@ public class Hitchbeacon extends Application {
 //            setListners();
 //            context.startActivity(new Intent(this,IconTabsActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
         }else {
-            sharedPreferences.edit().putBoolean(Constants.SIGNEDIN,false).commit(); // might cause shit
+//            sharedPreferences.edit().putBoolean(Constants.SIGNEDIN,false).commit(); // might cause shit
 //            context.startActivity(new Intent(this,OtpAuth.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
 
         }
@@ -175,6 +175,8 @@ public class Hitchbeacon extends Application {
                 User userInstance = dataSnapshot.getValue(User.class);
                 user = userInstance;
                 setListners();
+                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent("user"));
+
             }
 
             @Override

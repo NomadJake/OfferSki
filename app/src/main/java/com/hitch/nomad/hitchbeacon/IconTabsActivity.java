@@ -98,8 +98,8 @@ public class IconTabsActivity extends AppCompatActivity {
     private void setupViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
 //        adapter.addFrag(new OneFragment(), "ONE");
-        adapter.addFrag(new TwoFragment(), "TWO");
-        adapter.addFrag(new ThreeFragment(), "THREE");
+        adapter.addFrag(new TwoFragment(), "Offers");
+        adapter.addFrag(new ThreeFragment(), "Coupons");
         viewPager.setAdapter(adapter);
     }
 
@@ -130,7 +130,7 @@ public class IconTabsActivity extends AppCompatActivity {
         public CharSequence getPageTitle(int position) {
 
             // return null to display only the icon
-            return null;
+            return mFragmentTitleList.get(position);
         }
     }
 

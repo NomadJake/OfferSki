@@ -12,6 +12,7 @@
             android:id="@+id/tabs"
             android:layout_width="match_parent"
             android:layout_height="66dp"
+            android:background="#1976D2"
             app:tabMode="fixed"
             />
     </android.support.design.widget.AppBarLayout>

@@ -72,7 +72,11 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name=".DetailedActivity" />
+        <activity android:name=".DetailedActivity">
+            <intent-filter>
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
         <activity android:name=".IconTabsActivity" />
     </application>
 

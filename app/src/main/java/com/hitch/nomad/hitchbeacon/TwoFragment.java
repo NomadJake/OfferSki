@@ -69,7 +69,7 @@ public class TwoFragment extends Fragment {
         recyclerView = (RecyclerView) view.findViewById(R.id.list_offer);
 
         StaggeredGridLayoutManager gridLayoutManager =
-                new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
+                new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL);
         gridLayoutManager.setGapStrategy(StaggeredGridLayoutManager.GAP_HANDLING_MOVE_ITEMS_BETWEEN_SPANS);
 
         recyclerView.setLayoutManager(gridLayoutManager);
@@ -142,27 +142,27 @@ public class TwoFragment extends Fragment {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        mySwipeRefreshLayout.setOnRefreshListener(
-                new SwipeRefreshLayout.OnRefreshListener() {
-                    @Override
-                    public void onRefresh() {
-                        Log.i("swipe", "onRefresh called from SwipeRefreshLayout");
-
-                        // This method performs the actual data-refresh operation.
-                        // The method calls setRefreshing(false) when it's finished.
-                        List<Offer> allOffers = new ArrayList<>();
-                        allOffers = new ArrayList<>(Hitchbeacon.offerLinkedHashMap.values());
-                        if(allOffers.size() != 0){
-                            offers.clear();
-                        }
-                        for(Offer offer : allOffers){
-                            if(offer.getDiscovered().equals(true)){
-                                offers.add(offer);
-                            }
-                        }
-                    }
-                }
-        );
+//        mySwipeRefreshLayout.setOnRefreshListener(
+//                new SwipeRefreshLayout.OnRefreshListener() {
+//                    @Override
+//                    public void onRefresh() {
+//                        Log.i("swipe", "onRefresh called from SwipeRefreshLayout");
+//
+//                        // This method performs the actual data-refresh operation.
+//                        // The method calls setRefreshing(false) when it's finished.
+//                        List<Offer> allOffers = new ArrayList<>();
+//                        allOffers = new ArrayList<>(Hitchbeacon.offerLinkedHashMap.values());
+//                        if(allOffers.size() != 0){
+//                            offers.clear();
+//                        }
+//                        for(Offer offer : allOffers){
+//                            if(offer.getDiscovered().equals(true)){
+//                                offers.add(offer);
+//                            }
+//                        }
+//                    }
+//                }
+//        );
         return view;
     }
 

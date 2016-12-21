@@ -1,8 +1,12 @@
 package com.hitch.nomad.hitchbeacon;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -71,7 +75,8 @@ public class OtpAuth extends AppCompatActivity {
         });
         mDatabase = FirebaseDatabase.getInstance().getReference();
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
+                new IntentFilter("user"));
 
     }
 
@@ -147,7 +152,8 @@ public class OtpAuth extends AppCompatActivity {
                             Hitchbeacon.setListners();
                             mDatabase.child("users").child(user.email).setValue(user);
                             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-                            sharedPreferences.edit().putString("email",user.email).commit();
+                            sharedPreferences.edit().putBoolean(Constants.SIGNEDIN,true).apply();
+                            sharedPreferences.edit().putString("email",user.email).apply();
                             setLoggedin();
                             Hitchbeacon.loggedin=true;
                             Hitchbeacon.setLoggedin();
@@ -185,4 +191,12 @@ public class OtpAuth extends AppCompatActivity {
         RequestQueue requestQueue = Volley.newRequestQueue(this);
         requestQueue.add(jsonObjReq);
     }
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Get extra data included in the Intent
+            startActivity(new Intent(OtpAuth.this, IconTabsActivity.class));
+            Log.d("receiver", "Got Broadcast for user added.........");
+        }
+    };
 }

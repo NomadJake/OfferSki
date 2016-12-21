@@ -1,6 +1,7 @@
 package com.hitch.nomad.hitchbeacon;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,6 +11,7 @@ import android.widget.TextView;
 import com.android.volley.toolbox.ImageLoader;
 
 import java.util.List;
+import java.util.Random;
 
 public class OffersAdapter extends RecyclerView.Adapter<OffersAdapter.OfferVH> {
     Context context;
@@ -36,6 +38,19 @@ public class OffersAdapter extends RecyclerView.Adapter<OffersAdapter.OfferVH> {
         holder.title.setText(notes.get(position).getTitle());
         holder.note.setText(notes.get(position).getOffer());
         holder.offerImage.setImageUrl(notes.get(position).getLogoURI(),imageLoader);
+        Random rand = new Random();
+        int rem = position%4;
+        switch (rem){
+            case 0 : holder.lc.setBackgroundColor(Color.parseColor("#F44336"));
+                break;
+            case 1 : holder.lc.setBackgroundColor(Color.parseColor("#1976D2"));
+                break;
+            case 2 : holder.lc.setBackgroundColor(Color.parseColor("#F57C00"));
+                break;
+            case 3 : holder.lc.setBackgroundColor(Color.parseColor("#CDDC39"));
+                break;
+            default:holder.lc.setBackgroundColor(Color.parseColor("#E040FB"));
+        }
 
     }
 
@@ -47,6 +62,7 @@ public class OffersAdapter extends RecyclerView.Adapter<OffersAdapter.OfferVH> {
     class OfferVH extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView title, note;
         private FeedImageView offerImage;
+        View lc;
 
         public OfferVH(View itemView) {
             super(itemView);
@@ -54,6 +70,7 @@ public class OffersAdapter extends RecyclerView.Adapter<OffersAdapter.OfferVH> {
             title = (TextView) itemView.findViewById(R.id.note_item_title);
             note = (TextView) itemView.findViewById(R.id.note_item_desc);
             offerImage = (FeedImageView) itemView.findViewById(R.id.imageViewfav);
+            lc = (View) itemView.findViewById(R.id.line_color);
             itemView.setOnClickListener(this);
         }
 

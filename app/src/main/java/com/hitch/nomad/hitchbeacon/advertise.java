@@ -31,6 +31,7 @@ import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.Ringtone;
@@ -161,26 +162,35 @@ public class advertise extends Service implements LeScanCallback {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(TAG,"Started service , start command");
-        if(intent != null && intent.getAction()!=null && intent.getAction().equals("done")){
-            Bundle bundle = intent.getExtras();
-            try {
-                String url = uriMapping.get(bundle.getString("brand"));
-                Intent i = new Intent(Intent.ACTION_VIEW);
-                i.setData(Uri.parse(url));
-                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(i);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            stopForeground(true);
-        }else if(intent != null && intent.getAction()!=null && intent.getAction().equals("stop")){
-            alive = false;
-            Log.d(TAG,"Started stopped !!!!!! , start command");
-//            mBluetoothAdapter.disable();
-            stopForeground(true);
-            stopSelf();
-        }else {
+//        Log.d(TAG,"Started service , start command");
+//        if(intent != null && intent.getAction()!=null && intent.getAction().equals("done")){
+//            Bundle bundle = intent.getExtras();
+//            try {
+//                String url = uriMapping.get(bundle.getString("brand"));
+//                Intent i = new Intent(Intent.ACTION_VIEW);
+//                i.setData(Uri.parse(url));
+//                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                startActivity(i);
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//            stopForeground(true);
+//        }else if(intent != null && intent.getAction()!=null && intent.getAction().equals("stop")){
+//            alive = false;
+//            Log.d(TAG,"Started stopped !!!!!! , start command");
+////            mBluetoothAdapter.disable();
+//            stopForeground(true);
+//            stopSelf();
+//        }else {
+        if(intent.getAction() != null && intent.getAction().equals("details")){
+            Intent startDetails = new Intent(getApplicationContext(),DetailedActivity.class);
+            startDetails.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+            startDetails.putExtra("title",intent.getStringExtra("title"));
+            startDetails.putExtra("note",intent.getStringExtra("note"));
+            startDetails.putExtra("URL",intent.getStringExtra("URL"));
+            startActivity(startDetails);
+        }
             if (scanThread == null || !scanThread.isAlive()) {
                 mBluetoothAdapter.enable();
                 if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
@@ -198,10 +208,15 @@ public class advertise extends Service implements LeScanCallback {
                 scanThread = new TrackThread();
                 couponThread = new SayHello();
                 couponThread.start();
-                scanThread.start();
+                if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
+//                    Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_SHORT).show();
+
+                }else {
+                    scanThread.start();
+                }
                 scanArrayList = new ArrayList<>();
             }
-        }
+
         return START_NOT_STICKY;
     }
 
@@ -476,41 +491,54 @@ public class advertise extends Service implements LeScanCallback {
 
     public void notifyUser(String title,String description,String image){
         Intent doneIntent = new Intent(this,DetailedActivity.class);
-        doneIntent.setAction("done");
-//        doneIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        doneIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK );
+
+//        doneIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        int requestID = (int) System.currentTimeMillis();
+        doneIntent.setAction("details");
         doneIntent.putExtra("title",title);
         doneIntent.putExtra("note",description);
         doneIntent.putExtra("URL",image);
-        PendingIntent pendingDoneIntent = PendingIntent.getService(this, 0,
-                doneIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingDoneIntent = PendingIntent.getActivity(this, requestID,
+                doneIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_ONE_SHOT);
 
-        Intent stopIntent = new Intent(this,advertise.class);
-        stopIntent.setAction("stop");
-        PendingIntent pendingStopIntent = PendingIntent.getService(this, 0,
-                stopIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+//        Intent stopIntent = new Intent(this,advertise.class);
+//        stopIntent.setAction("stop");
+//        PendingIntent pendingStopIntent = PendingIntent.getService(this, 0,
+//                stopIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
         Bitmap icon = BitmapFactory.decodeResource(getResources(),
                 R.drawable.fronthitchlogo);
 
-        builder = new NotificationCompat.Builder(getApplicationContext());
-
-        builder.setContentTitle(title);
-        builder.setContentText(description);
-        builder.setSmallIcon(R.drawable.ic_add_24dp);
-        builder.setLargeIcon(Bitmap.createScaledBitmap(icon, 200, 200, false));
-//        builder.setPriority(Notification.PRIORITY_HIGH);
-        builder.setContentIntent(pendingDoneIntent);
-//        builder.setOngoing(false);
-//        builder.setAutoCancel(false);
-        stateHolderNotification = builder.build();
 
 
-        Uri notificationSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notificationSound);
-        r.play();
-        startForeground(131,
-                stateHolderNotification);
+        Notification n  = new Notification.Builder(this)
+                .setContentTitle(title)
+                .setContentText(description)
+                .setSmallIcon(R.drawable.logorep)
+                .setLargeIcon(icon)
+                .setContentIntent(pendingDoneIntent)
+                .setAutoCancel(true)
+                .build();
+
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
+        notificationManager.notify(0001, n);
+
+
+
+//        NotificationManager notificationManager =
+//                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+//
+//        notificationManager.notify(0, n);
+//
+//        Uri notificationSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+//        Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notificationSound);
+//        r.play();
+//        startForeground(131,
+//                stateHolderNotification);
     }
 
     public class TrackThread extends Thread {
@@ -580,7 +608,7 @@ public class advertise extends Service implements LeScanCallback {
                     }
                 }
                 try {
-                    Thread.currentThread().sleep(1 * 60000);
+                    Thread.currentThread().sleep(1 * 6000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
