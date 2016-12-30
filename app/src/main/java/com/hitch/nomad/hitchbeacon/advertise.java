@@ -42,6 +42,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Vibrator;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
@@ -373,32 +374,6 @@ public class advertise extends Service implements LeScanCallback {
 
     }
 
-//    private void scanLeDevice(final boolean enable) {
-//        if (enable) {
-//            mHandler.postDelayed(new Runnable() {
-//                @Override
-//                public void run() {
-//                    if (Build.VERSION.SDK_INT < 21) {
-//                        mBluetoothAdapter.stopLeScan(mLeScanCallback);
-//                    } else {
-//                        mLEScanner.stopScan(mScanCallback);
-//
-//                    }
-//                }
-//            }, SCAN_PERIOD);
-//            if (Build.VERSION.SDK_INT < 21) {
-//                mBluetoothAdapter.startLeScan(mLeScanCallback);
-//            } else {
-//                mLEScanner.startScan(filters, settings, mScanCallback);
-//            }
-//        } else {
-//            if (Build.VERSION.SDK_INT < 21) {
-//                mBluetoothAdapter.stopLeScan(mLeScanCallback);
-//            } else {
-//                mLEScanner.stopScan(mScanCallback);
-//            }
-//        }
-//    }
 
     @Override
     public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
@@ -471,7 +446,7 @@ public class advertise extends Service implements LeScanCallback {
             if(hid.equals(hitchId)){
                 if(!user.discoveredOffers.contains(offer.getOffer())){
                     Log.d("offerfound","hitch found ... notifying user");
-                    notifyUser(offer.title,offer.getOffer(),offer.getLogoURI());
+                    notifyUser(offer.title,offer.getOffer(),offer.uid,offer.getLogoURI());
                     try {
 //                        offer.setDiscovered(true);
 //                        Hitchbeacon.offerLinkedHashMap.put(key,offer);
@@ -489,16 +464,16 @@ public class advertise extends Service implements LeScanCallback {
 
     }
 
-    public void notifyUser(String title,String description,String image){
+    public void notifyUser(String title,String description,String image,String logoURL){
         Intent doneIntent = new Intent(this,DetailedActivity.class);
         doneIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK );
-
 //        doneIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         int requestID = (int) System.currentTimeMillis();
         doneIntent.setAction("details");
         doneIntent.putExtra("title",title);
         doneIntent.putExtra("note",description);
         doneIntent.putExtra("URL",image);
+        doneIntent.putExtra("logoURL",logoURL);
         PendingIntent pendingDoneIntent = PendingIntent.getActivity(this, requestID,
                 doneIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_ONE_SHOT);
 
@@ -509,7 +484,7 @@ public class advertise extends Service implements LeScanCallback {
 //                stopIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         Bitmap icon = BitmapFactory.decodeResource(getResources(),
-                R.drawable.fronthitchlogo);
+                R.drawable.logorep);
 
 
 
@@ -534,11 +509,13 @@ public class advertise extends Service implements LeScanCallback {
 //
 //        notificationManager.notify(0, n);
 //
-//        Uri notificationSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-//        Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notificationSound);
-//        r.play();
-//        startForeground(131,
-//                stateHolderNotification);
+        Uri notificationSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notificationSound);
+        r.play();
+        Vibrator v = (Vibrator) this.getApplicationContext().getSystemService(Context.VIBRATOR_SERVICE);
+        // Vibrate for 500 milliseconds
+        v.vibrate(500);
+
     }
 
     public class TrackThread extends Thread {
@@ -589,6 +566,7 @@ public class advertise extends Service implements LeScanCallback {
                 int Low = 0;
                 int High = coupons.size();
                 Note testNote = null;
+
                 try {
                     int Result = r.nextInt(High-Low) + Low;
                     Log.d("Random: ",Integer.toString(Result));
@@ -596,9 +574,10 @@ public class advertise extends Service implements LeScanCallback {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+
                 if (testNote!=null) {
                     if (!user.discoveredNotes.contains(testNote.getNote())) {
-                        notifyUser(testNote.title, testNote.note, testNote.logoURI);
+                        notifyUser(testNote.title, testNote.note, testNote.shopURI,testNote.logoURI);
     //                    testNote.discovered = true;
                         user.discoveredNotes.add(testNote.getNote());
                         mDatabase.child("users").child(user.email).setValue(user);
