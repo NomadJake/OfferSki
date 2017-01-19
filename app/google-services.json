@@ -1,27 +1,27 @@
 {
   "project_info": {
-    "project_number": "817010425169",
-    "firebase_url": "https://hitch-67c90.firebaseio.com",
-    "project_id": "hitch-67c90",
-    "storage_bucket": "hitch-67c90.appspot.com"
+    "project_number": "463540512196",
+    "firebase_url": "https://offersky-b8b91.firebaseio.com",
+    "project_id": "offersky-b8b91",
+    "storage_bucket": "offersky-b8b91.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:817010425169:android:dbf5650f6a6d9491",
+        "mobilesdk_app_id": "1:463540512196:android:8a8f8b15c5b6f440",
         "android_client_info": {
-          "package_name": "com.hitch.nomad.hitchbeacon"
+          "package_name": "com.offersky.nomad.hitchbeacon"
         }
       },
       "oauth_client": [
         {
-          "client_id": "817010425169-q7joid757mjmihur1nkinc75d2k2b303.apps.googleusercontent.com",
+          "client_id": "463540512196-f2uh5gamfpurubdekd9o29f7rnq317u2.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBvzCHcKAu4SmuE4kXw8jDLeHP961PHh4U"
+          "current_key": "AIzaSyBEc1JYXXKRr8agZ4NffkuHReeMpFxIxP0"
         }
       ],
       "services": {

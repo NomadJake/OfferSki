@@ -17,13 +17,13 @@
         android:id="@+id/tvOffer"
         />
 
-    <com.hitch.nomad.hitchbeacon.FeedImageView
+    <com.offersky.nomad.hitchbeacon.FeedImageView
         android:layout_width="200dp"
         android:layout_height="200dp"
         android:layout_gravity="center"
         android:id="@+id/imageView" />
 
-    <com.hitch.nomad.hitchbeacon.FeedImageView
+    <com.offersky.nomad.hitchbeacon.FeedImageView
         android:layout_width="200dp"
         android:layout_height="200dp"
         android:layout_gravity="center"

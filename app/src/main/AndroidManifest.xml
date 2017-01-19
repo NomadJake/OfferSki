@@ -1,45 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.hitch.nomad.hitchbeacon">
+    package="com.offersky.nomad.hitchbeacon">
 
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.VIBRATE" />
 
-    <uses-feature android:name="android.hardware.bluetooth_le" android:required="true"/>
-
+    <!--<uses-feature-->
+        <!--android:name="android.hardware.bluetooth_le"-->
+        <!--android:required="true" />-->
 
     <application
-        android:name=".Hitchbeacon"
+        android:name="com.offersky.nomad.hitchbeacon.Hitchbeacon"
         android:allowBackup="true"
-        android:icon="@drawable/spl"
+        android:icon="@drawable/logonew"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-        <activity android:name=".splash"
+        <activity
+            android:name="com.offersky.nomad.hitchbeacon.splash"
             android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".LoginActivity" />
-        <activity android:name=".OtpAuth" />
-        <activity android:name=".SignupActivity" />
-        <activity android:name=".ResetPasswordActivity" />
+        <activity android:name="com.offersky.nomad.hitchbeacon.LoginActivity" />
+        <activity android:name="com.offersky.nomad.hitchbeacon.OtpAuth" />
+        <activity android:name="com.offersky.nomad.hitchbeacon.SignupActivity" />
+        <activity android:name="com.offersky.nomad.hitchbeacon.ResetPasswordActivity" />
 
-        <service android:name=".advertise" />
-        <service android:name=".MyMessagingService">
+        <service android:name="com.offersky.nomad.hitchbeacon.advertise" />
+        <service android:name="com.offersky.nomad.hitchbeacon.MyMessagingService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-        <service android:name=".MyFirebaseInstanceIDService">
+        <service android:name="com.offersky.nomad.hitchbeacon.MyFirebaseInstanceIDService">
             <intent-filter>
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>
@@ -59,27 +57,28 @@
             android:value="com.hitch.nomad.hitchbeacon" />
 
         <receiver
-            android:name=".AlarmReceiver"
+            android:name="com.offersky.nomad.hitchbeacon.AlarmReceiver"
             android:enabled="true">
             <intent-filter>
                 <action android:name="android.intent.action.NOTIFY" />
-                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
-
-        <receiver android:name=".DeviceBootReceiver"
+        <receiver
+            android:name="com.offersky.nomad.hitchbeacon.DeviceBootReceiver"
             android:enabled="false">
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
 
-        <activity android:name=".DetailedActivity">
+        <activity android:name="com.offersky.nomad.hitchbeacon.DetailedActivity">
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".IconTabsActivity" />
+        <activity android:name="com.offersky.nomad.hitchbeacon.IconTabsActivity" />
+        <activity android:name="com.offersky.nomad.hitchbeacon.walkthrough"></activity>
     </application>
 
 </manifest>

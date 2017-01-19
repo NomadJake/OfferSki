@@ -56,7 +56,7 @@
             android:padding="5dp"
             android:layout_height="match_parent">
 
-            <com.hitch.nomad.hitchbeacon.FeedImageView
+            <com.offersky.nomad.hitchbeacon.FeedImageView
                 android:id="@+id/imageViewfav"
                 android:layout_gravity="center"
                 android:layout_width="match_parent"

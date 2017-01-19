@@ -9,7 +9,7 @@
             android:layout_height="50dp"
             android:layout_width="50dp"
             android:gravity="center"
-            android:src="@drawable/spl"/>
+            android:src="@drawable/logonew"/>
         <!--<ImageView-->
             <!--android:layout_width="50dp"-->
             <!--android:layout_height="50dp"-->
