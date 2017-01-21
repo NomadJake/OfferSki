@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "463540512196-mie2sl4q7tigu0m12r8lt5adffsujsdp.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.offersky.nomad.hitchbeacon",
+            "certificate_hash": "0F3FB0492271C0B26BF2FD3EE23AD3278BA2934A"
+          }
+        },
+        {
           "client_id": "463540512196-f2uh5gamfpurubdekd9o29f7rnq317u2.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -29,8 +37,13 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "463540512196-f2uh5gamfpurubdekd9o29f7rnq317u2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         },
         "ads_service": {
           "status": 2

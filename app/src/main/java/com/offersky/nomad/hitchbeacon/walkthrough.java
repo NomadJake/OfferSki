@@ -18,7 +18,13 @@ public class walkthrough extends AppCompatActivity {
         nextBt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(walkthrough.this,OtpAuth.class));
+                if(Hitchbeacon.user == null){
+                    startActivity(new Intent(walkthrough.this,OtpAuth.class));
+
+                }else {
+                    startActivity(new Intent(walkthrough.this,IconTabsActivity.class));
+
+                }
             }
         });
     }
